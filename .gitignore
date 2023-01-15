@@ -13,8 +13,8 @@
 
 *.py
 
-!aiotieba-reviewer
-!aiotieba-reviewer/**
+!aiotieba_reviewer
+!aiotieba_reviewer/**
 !.github
 !.github/**
 !docs
