@@ -90,13 +90,16 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
     op = punish.op
     if op == Ops.NORMAL:
         return
-    if op == Ops.WHITE:
-        return
     if op == Ops.DELETE:
         LOG().info(
             f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
         )
         await delete_list.append(punish.obj.pid)
+        return
+    if op == Ops.DEBUG:
+        LOG().info(
+            f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+        )
         return
     if op == Ops.HIDE:
         LOG().info(
@@ -131,13 +134,16 @@ class _punish_executor_test(object):
         op = punish.op
         if op == Ops.NORMAL:
             return
-        if op == Ops.WHITE:
-            return
         if op == Ops.DELETE:
             LOG().info(
                 f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
             )
             self.punishes.append(punish)
+            return
+        if op == Ops.DEBUG:
+            LOG().info(
+                f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+            )
             return
         if op == Ops.HIDE:
             LOG().info(

@@ -43,6 +43,20 @@ async def _default_posts_runner(thread: Thread) -> Optional[Punish]:
         if _posts is not None:
             posts = _posts
 
+    for filt in filter.filters:
+        punishes = await filt(posts)
+        if punishes is None:
+            continue
+        for punish in punishes:
+            posts.remove(punish.obj)
+        punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
+        if punishes:
+            punish = Punish(thread)
+            for _punish in punishes:
+                if _punish is not None:
+                    punish |= _punish
+            return punish
+
     punishes = await asyncio.gather(*[post_runner(p) for p in posts])
     punishes = [p for p in punishes if p is not None]
     if punishes:

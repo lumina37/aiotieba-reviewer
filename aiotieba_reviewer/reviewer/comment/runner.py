@@ -32,10 +32,19 @@ TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
 async def _default_comments_runner(post: Post) -> Optional[Punish]:
     comments = await producer.producer(post)
 
-    for _filter in filter.filters:
-        _comments = await _filter(comments)
-        if _comments is not None:
-            comments = _comments
+    for filt in filter.filters:
+        punishes = await filt(comments)
+        if punishes is None:
+            continue
+        for punish in punishes:
+            comments.remove(punish.obj)
+        punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
+        if punishes:
+            punish = Punish(post)
+            for _punish in punishes:
+                if _punish is not None:
+                    punish |= _punish
+            return punish
 
     punishes = await asyncio.gather(*[comment_runner(c) for c in comments])
     if punishes:

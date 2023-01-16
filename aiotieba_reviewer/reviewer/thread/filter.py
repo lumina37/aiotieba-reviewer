@@ -1,8 +1,9 @@
 from typing import Awaitable, Callable, List, Optional
 
 from ..._typing import Thread
+from ...classdef import Punish
 
-TypeThreadsFilter = Callable[[List[Thread]], Awaitable[Optional[List[Thread]]]]
+TypeThreadsFilter = Callable[[List[Thread]], Awaitable[Optional[List[Punish]]]]
 
 filters: List[TypeThreadsFilter] = []
 

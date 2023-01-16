@@ -3,7 +3,7 @@ from typing import Awaitable, Callable, Optional
 from ... import client
 from ..._typing import Post
 from ...classdef import Punish
-from ..user import user_checker
+from ..user_checker import user_checker
 
 TypePostChecker = Callable[[Post], Awaitable[Optional[Punish]]]
 

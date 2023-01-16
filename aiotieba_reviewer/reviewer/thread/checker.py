@@ -3,7 +3,7 @@ from typing import Awaitable, Callable, Optional
 from ... import client
 from ..._typing import Thread
 from ...classdef import Punish
-from ..user import user_checker
+from ..user_checker import user_checker
 
 TypeThreadChecker = Callable[[Thread], Awaitable[Optional[Punish]]]
 

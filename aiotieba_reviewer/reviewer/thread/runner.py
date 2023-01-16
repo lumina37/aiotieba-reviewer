@@ -1,3 +1,4 @@
+import asyncio
 from typing import Awaitable, Callable
 
 from aiotieba import LOG
@@ -61,6 +62,14 @@ async def _default_threads_runner(fname: str, pn: int = 1) -> None:
         if _threads is not None:
             threads = _threads
 
+    for filt in filter.filters:
+        punishes = await filt(threads)
+        if punishes is None:
+            continue
+        for punish in punishes:
+            threads.remove(punish.obj)
+        await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
+
     for thread in threads:
         await thread_runner(thread)
 
@@ -70,7 +79,7 @@ def _threads_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
 
     async def _(fname: str, pn: int = 1) -> None:
         punish = await perf_stat(func)(fname, pn)
-        LOG().debug(f"Checked pn={pn} time={perf_stat.last_time/1e3:.5f}s")
+        LOG().info(f"Checked pn={pn} time={perf_stat.last_time/1e3:.5f}s")
         return punish
 
     return _

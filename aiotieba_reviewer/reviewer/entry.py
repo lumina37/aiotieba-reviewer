@@ -45,6 +45,9 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(64, 0, -1)) ->
     post.set_checker(True, False)(post.checker.ori_checker)
     comment.set_checker(True, False)(comment.checker.ori_checker)
 
+    thread.runner.set_thread_runner(True)(thread.runner.ori_thread_runner)
+    thread.runner.set_threads_runner(True)(thread.runner.ori_threads_runner)
+
     for pn in pn_gen:
         await thread.runner.threads_runner(client._fname, pn)
 

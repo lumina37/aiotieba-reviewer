@@ -19,7 +19,7 @@ def user_checker(func):
         if permission <= -5:
             return Punish(obj, Ops.DELETE, 10, "黑名单")
         if permission >= 1:
-            return Punish(obj, Ops.WHITE)
+            return Punish(obj, Ops.NORMAL)
         return await func(obj)
 
     return _
