@@ -10,7 +10,7 @@ pip install aiotieba-reviewer
 
 ## 教程
 
-[**云审查教程**](https://v-8.top/tutorial/reviewer)
+[**云审查教程**](tutorial/reviewer.md)
 
 ## 友情链接
 
