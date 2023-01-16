@@ -26,8 +26,9 @@ def _thread_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
     perf_stat = aperf_stat()
 
     async def _(thread: Thread) -> None:
-        LOG().debug(f"Scanning tid={thread.tid} last_time={perf_stat.last_time/1e3:.5f}s")
-        return await perf_stat(func)(thread)
+        punish = await perf_stat(func)(thread)
+        LOG().debug(f"Checked tid={thread.tid} time={perf_stat.last_time/1e3:.5f}s")
+        return punish
 
     return _
 
@@ -67,9 +68,10 @@ async def _default_threads_runner(fname: str, pn: int = 1) -> None:
 def _threads_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
     perf_stat = aperf_stat()
 
-    async def _(fname: str, pn: int) -> None:
-        LOG().debug(f"Scanning pn={pn} last_time={perf_stat.last_time/1e3:.5f}s")
-        return await perf_stat(func)(fname, pn)
+    async def _(fname: str, pn: int = 1) -> None:
+        punish = await perf_stat(func)(fname, pn)
+        LOG().debug(f"Checked pn={pn} time={perf_stat.last_time/1e3:.5f}s")
+        return punish
 
     return _
 

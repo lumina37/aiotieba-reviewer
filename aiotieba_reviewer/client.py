@@ -2,7 +2,7 @@ from typing import AsyncGenerator
 
 import aiotieba
 
-from ._database import MySQLDB, SQLiteDB
+from .database import MySQLDB, SQLiteDB
 
 _fname = ''
 _db_sqlite = None
