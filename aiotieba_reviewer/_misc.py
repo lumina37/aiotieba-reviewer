@@ -24,6 +24,7 @@ class Punish(object):
         'obj',
         'op',
         'day',
+        'trace',
         'note',
     ]
 
@@ -52,3 +53,10 @@ class Punish(object):
                 'note': self.note,
             }
         )
+
+    def __or__(self, rhs: "Punish") -> "Punish":
+        if rhs.day > self.day:
+            return rhs
+        if rhs.op > self.op:
+            return rhs
+        return self

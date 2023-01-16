@@ -4,9 +4,9 @@ from ..._typing import Thread
 
 TypeThreadsFilter = Callable[[List[Thread]], Awaitable[Optional[List[Thread]]]]
 
-_filters = []
+_filters: List[TypeThreadsFilter] = []
 
 
-def set_threads_filters(filters: List[TypeThreadsFilter]) -> None:
-    global _filters
-    _filters = filters
+def append_threads_filter(filter: TypeThreadsFilter) -> TypeThreadsFilter:
+    _filters.append(filter)
+    return filter
