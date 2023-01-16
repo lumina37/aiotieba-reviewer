@@ -26,6 +26,13 @@ class DeleteList(object):
         那么计划的删除任务会被取消
     """
 
+    __slots__ = [
+        '_execute_timeout',
+        '_maxlen',
+        '_delete_task',
+        '_pids',
+    ]
+
     def __init__(self, execute_timeout: float = 10.0, maxlen=30) -> None:
         self._execute_timeout = execute_timeout
         self._maxlen = maxlen
