@@ -1,3 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+urls = { Repository = "https://github.com/Starry-OvO/aiotieba-reviewer/" }
+name = "aiotieba-reviewer"
+description = "Reviewer Framework based on Aiotieba"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Starry-OvO", email = "starry.qvq@gmail.com" }]
+keywords = ["tieba"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet :: WWW/HTTP :: Session",
+]
+dependencies = ["aiotieba<4.0,>=2.10.3"]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+include = ["aiotieba_reviewer*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "aiotieba_reviewer.__version__.__version__" }
+
 [tool.black]
 line-length = 120
 skip-string-normalization = true

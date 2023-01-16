@@ -1,0 +1,28 @@
+site_name: aiotieba_reviewer
+site_description: aiotieba开发文档
+site_url: https://v-8.top/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+  language: zh
+
+repo_name: Starry-OvO/aiotieba
+repo_url: https://github.com/Starry-OvO/aiotieba
+
+nav:
+    - 介绍: index.md
+    - 教程:
+      - 云审查教程: tutorial/reviewer.md
+      - 指令管理器使用教程: tutorial/cmd_handler_user.md
+      - 指令管理器配置教程: tutorial/cmd_handler_dev.md
+
+markdown_extensions:
+  - md_in_html
+  - admonition
+  - codehilite:
+      css_class: highlight
+
+extra_css:
+    - css/custom.css

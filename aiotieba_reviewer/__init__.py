@@ -1,4 +1,5 @@
 from . import executor, reviewer, utils
+from .__version__ import __version__
 from ._typing import Comment, Post, Thread, TypeObj
 from .classdef import Punish
 from .client import (
