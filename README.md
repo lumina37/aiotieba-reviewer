@@ -1,6 +1,6 @@
 ## 简介
 
-基于[**aiotieba**](https://github.com/Starry-OvO/aiotieba)实现的高弹性云审查框架
+基于[**aiotieba**](https://github.com/Starry-OvO/aiotieba)实现的百度贴吧高弹性吧务审查框架
 
 ## 安装
 
@@ -10,7 +10,7 @@ pip install aiotieba-reviewer
 
 ## 教程
 
-[**云审查教程**](https://v-8.top/tutorial/reviewer)
+[**云审查教程**](https://starry-ovo.github.io/aiotieba-reviewer/tutorial/reviewer/)
 
 ## 友情链接
 
