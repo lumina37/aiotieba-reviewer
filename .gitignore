@@ -21,6 +21,8 @@
 !docs/**
 !tests
 !tests/**
+!examples
+!examples/**
 
 !README.md
 !requirements.txt
