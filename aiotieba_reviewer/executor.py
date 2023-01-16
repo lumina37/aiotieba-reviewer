@@ -3,9 +3,9 @@ from typing import Awaitable, Callable, Optional, Protocol
 
 from aiotieba import LOG
 
-from ._enum import Ops
-from ._misc import Punish
+from .classdef import Punish
 from .client import get_client, get_fname
+from .enum import Ops
 
 
 class TypeDeleteList(Protocol):
@@ -63,10 +63,10 @@ class DeleteList(object):
             return
 
 
-_delete_list = DeleteList()
+delete_list = DeleteList()
 
 
-def set_delete_list(delete_list: TypeDeleteList) -> None:
+def set_delete_list(_delete_list: TypeDeleteList) -> None:
     """
     设置删除列表
 
@@ -74,14 +74,14 @@ def set_delete_list(delete_list: TypeDeleteList) -> None:
         delete_list (TypeDeleteList)
     """
 
-    global _delete_list
-    _delete_list = delete_list
+    global delete_list
+    delete_list = _delete_list
 
 
 TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
 
 
-async def punish_executor(punish: Punish) -> Optional[Punish]:
+async def default_punish_executor(punish: Punish) -> Optional[Punish]:
 
     if day := punish.day:
         client = await get_client()
@@ -96,7 +96,7 @@ async def punish_executor(punish: Punish) -> Optional[Punish]:
         LOG().info(
             f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
         )
-        await _delete_list.append(punish.obj.pid)
+        await delete_list.append(punish.obj.pid)
         return
     if op == Ops.HIDE:
         LOG().info(
@@ -123,7 +123,7 @@ class _punish_executor_test(object):
     def __init__(self) -> None:
         self.punishes = []
 
-    def __call__(self, punish: Punish) -> Optional[Punish]:
+    async def __call__(self, punish: Punish) -> Optional[Punish]:
 
         if day := punish.day:
             LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
@@ -154,7 +154,7 @@ class _punish_executor_test(object):
             return Punish(op, punish.day, punish.note)
 
 
-punish_executor_test = _punish_executor_test()
+default_punish_executor_test = _punish_executor_test()
 
 
-_punish_executor = punish_executor_test
+punish_executor = default_punish_executor_test

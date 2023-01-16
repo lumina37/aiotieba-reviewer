@@ -1,6 +1,10 @@
+from typing import Tuple
+
 import cv2 as cv
 import numpy as np
 from aiotieba import LOG
+
+from .client import get_db
 
 _qrdetector = None
 _img_hasher = None
@@ -81,3 +85,39 @@ def compute_imghash(image: "np.ndarray") -> int:
         img_hash = 0
 
     return img_hash
+
+
+async def get_imghash(image: "np.ndarray", *, hamming_dist: int = 0) -> int:
+    """
+    获取图像的封锁级别
+
+    Args:
+        image (np.ndarray): 图像
+        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+
+    Returns:
+        int: 封锁级别
+    """
+
+    if img_hash := compute_imghash(image):
+        db = await get_db()
+        return await db.get_imghash(img_hash, hamming_dist=hamming_dist)
+    return 0
+
+
+async def get_imghash_full(image: "np.ndarray", *, hamming_dist: int = 0) -> Tuple[int, str]:
+    """
+    获取图像的完整信息
+
+    Args:
+        image (np.ndarray): 图像
+        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+
+    Returns:
+        tuple[int, str]: 封锁级别, 备注
+    """
+
+    if img_hash := compute_imghash(image):
+        db = await get_db()
+        return await db.get_imghash_full(img_hash, hamming_dist=hamming_dist)
+    return 0, ''

@@ -2,11 +2,13 @@ from typing import AsyncGenerator
 
 import aiotieba
 
+from ._database import MySQLDB, SQLiteDB
+
 _fname = ''
+_db_sqlite = None
 
 client_generator: AsyncGenerator[aiotieba.Client, None] = None
-db_generator: AsyncGenerator[aiotieba.MySQLDB, None] = None
-db_sqlite_generator: AsyncGenerator[aiotieba.SQLiteDB, None] = None
+db_generator: AsyncGenerator[MySQLDB, None] = None
 
 
 def set_BDUSS_key(BDUSS_key: str) -> None:
@@ -23,7 +25,7 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
                 yield client
 
     global client_generator
-    client_generator = _client_generator
+    client_generator = _client_generator()
 
 
 async def get_client() -> aiotieba.Client:
@@ -49,43 +51,38 @@ def set_fname(fname: str) -> None:
     _fname = fname
 
     async def _db_generator():
-        async with aiotieba.MySQLDB(fname) as db:
+        async with MySQLDB(fname) as db:
             while 1:
                 yield db
 
     global db_generator
-    db_generator = _db_generator
+    db_generator = _db_generator()
 
-    async def _db_sqlite_generator():
-        async with aiotieba.SQLiteDB(fname) as db_sqlite:
-            while 1:
-                yield db_sqlite
-
-    global db_sqlite_generator
-    db_sqlite_generator = _db_sqlite_generator
+    global _db_sqlite
+    _db_sqlite = SQLiteDB(fname)
 
 
 def get_fname() -> str:
     return _fname
 
 
-async def get_db() -> aiotieba.MySQLDB:
+async def get_db() -> MySQLDB:
     """
     获取一个MySQL客户端
 
     Returns:
-        aiotieba.MySQLDB
+        MySQLDB
     """
 
     return await db_generator.__anext__()
 
 
-async def get_db_sqlite() -> aiotieba.SQLiteDB:
+def get_db_sqlite() -> SQLiteDB:
     """
     获取一个SQLite客户端
 
     Returns:
-        aiotieba.SQLiteDB
+        SQLiteDB
     """
 
-    return await db_sqlite_generator.__anext__()
+    return _db_sqlite

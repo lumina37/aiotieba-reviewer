@@ -1,13 +1,7 @@
 import sys
 
-from ._enum import Ops
 from ._typing import TypeObj
-
-
-class Mode:
-    LOOP = 'loop'
-    FLUSH = 'flush'
-    TEST = 'test'
+from .enum import Ops
 
 
 class Punish(object):

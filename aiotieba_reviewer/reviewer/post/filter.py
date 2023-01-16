@@ -4,9 +4,9 @@ from ..._typing import Post
 
 TypePostsFilter = Callable[[List[Post]], Awaitable[Optional[List[Post]]]]
 
-_filters: List[TypePostsFilter] = []
+filters: List[TypePostsFilter] = []
 
 
-def append_posts_filter(filter: TypePostsFilter) -> TypePostsFilter:
-    _filters.append(filter)
-    return filter
+def append_filter(new_filter: TypePostsFilter) -> TypePostsFilter:
+    filters.append(new_filter)
+    return new_filter

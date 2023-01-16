@@ -4,9 +4,9 @@ from ..._typing import Comment
 
 TypeCommentsFilter = Callable[[List[Comment]], Awaitable[Optional[List[Comment]]]]
 
-_filters: List[TypeCommentsFilter] = []
+filters: List[TypeCommentsFilter] = []
 
 
-def append_comments_filter(filter: TypeCommentsFilter) -> TypeCommentsFilter:
-    _filters.append(filter)
-    return filter
+def append_filter(new_filter: TypeCommentsFilter) -> TypeCommentsFilter:
+    filters.append(new_filter)
+    return new_filter
