@@ -26,7 +26,7 @@ class Punish(object):
         self.obj = obj
         self.op = op
         self.day = day
-        if op < Ops.NORMAL:
+        if op > Ops.NORMAL:
             line = sys._getframe(1).f_lineno
             self.note = f"L{line} {note}"
         else:
