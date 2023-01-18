@@ -371,7 +371,7 @@ class Listener(object):
         屏蔽指令所在主题帖
         """
 
-        if await ctx.admin.hide_thread(ctx.tid):
+        if await ctx.admin.hide_thread(ctx.fname,ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=0)
@@ -777,7 +777,7 @@ class Listener(object):
         将指令所在主题帖标记为无关水，并临时屏蔽
         """
 
-        if await ctx.admin_db.add_tid(ctx.tid, tag=1) and await ctx.admin.hide_thread(ctx.tid):
+        if await ctx.admin_db.add_tid(ctx.tid, tag=1) and await ctx.admin.hide_thread(ctx.fname,ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=0)
