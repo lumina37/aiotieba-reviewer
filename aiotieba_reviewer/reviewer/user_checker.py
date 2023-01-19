@@ -1,9 +1,9 @@
 from typing import Optional
 
 from .._typing import TypeObj
-from ..classdef import Punish
 from ..client import get_db
 from ..enum import Ops
+from ..punish import Punish
 
 
 def user_checker(func):

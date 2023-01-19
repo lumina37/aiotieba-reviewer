@@ -2,7 +2,7 @@ from typing import Awaitable, Callable, Optional
 
 from ... import client
 from ..._typing import Thread
-from ...classdef import Punish
+from ...punish import Punish
 from ..user_checker import user_checker
 
 TypeThreadChecker = Callable[[Thread], Awaitable[Optional[Punish]]]
@@ -51,18 +51,18 @@ async def _default_checker(thread: Thread) -> Optional[Punish]:
 
 
 ori_checker = _default_checker
-checker = thread_id_checker(user_checker(ori_checker))
+checker = user_checker(ori_checker)
 
 
 def set_checker(
-    enable_user_checker: bool = True, enable_id_checker: bool = True
+    enable_user_checker: bool = True, enable_id_checker: bool = False
 ) -> Callable[[TypeThreadChecker], TypeThreadChecker]:
     """
     装饰器: 设置主题帖检查函数
 
     Args:
         enable_user_checker (bool, optional): 是否检查发帖用户的黑白名单状态. Defaults to True.
-        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to True.
+        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to False.
 
     Returns:
         Callable[[TypeThreadChecker], TypeThreadChecker]

@@ -2,7 +2,7 @@ from typing import Awaitable, Callable, Optional
 
 from ... import client
 from ..._typing import Post
-from ...classdef import Punish
+from ...punish import Punish
 from ..user_checker import user_checker
 
 TypePostChecker = Callable[[Post], Awaitable[Optional[Punish]]]
@@ -37,18 +37,18 @@ async def _default_post_checker(post: Post) -> Optional[Punish]:
 
 
 ori_checker = _default_post_checker
-checker = post_id_checker(user_checker(ori_checker))
+checker = user_checker(ori_checker)
 
 
 def set_checker(
-    enable_user_checker: bool = True, enable_id_checker: bool = True
+    enable_user_checker: bool = True, enable_id_checker: bool = False
 ) -> Callable[[TypePostChecker], TypePostChecker]:
     """
     装饰器: 设置回复检查函数
 
     Args:
         enable_user_checker (bool, optional): 是否检查发帖用户的黑白名单状态. Defaults to True.
-        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to True.
+        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to False.
 
     Returns:
         Callable[[TypePostChecker], TypePostChecker]

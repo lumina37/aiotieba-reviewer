@@ -3,9 +3,9 @@ from typing import Awaitable, Callable, Optional, Protocol
 
 from aiotieba import LOG
 
-from .classdef import Punish
 from .client import get_client, get_fname
 from .enum import Ops
+from .punish import Punish
 
 
 class TypeDeleteList(Protocol):
