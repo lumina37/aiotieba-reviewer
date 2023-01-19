@@ -36,14 +36,14 @@ checker = user_checker(ori_checker)
 
 
 def set_checker(
-    enable_user_checker: bool = True, enable_id_checker: bool = False
+    enable_user_checker: bool = True, enable_id_checker: bool = True
 ) -> Callable[[TypeCommentChecker], TypeCommentChecker]:
     """
     装饰器: 设置楼中楼检查函数
 
     Args:
         enable_user_checker (bool, optional): 是否检查发帖用户的黑白名单状态. Defaults to True.
-        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to False.
+        enable_id_checker (bool, optional): 是否使用历史状态缓存避免重复检查. Defaults to True.
 
     Returns:
         Callable[[TypeCommentChecker], TypeCommentChecker]
