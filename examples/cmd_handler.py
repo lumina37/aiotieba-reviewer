@@ -698,7 +698,7 @@ class Listener(object):
             image = await self.listener.get_image(img.src)
             if image is None:
                 continue
-            img_hash = tbr.utils.compute_imghash(image)
+            img_hash = tbr.compute_imghash(image)
             if img_hash == 4412820541203793671:
                 continue
 
@@ -724,7 +724,7 @@ class Listener(object):
             image = await self.listener.get_image(img.src)
             if image is None:
                 continue
-            img_hash = tbr.utils.compute_imghash(image)
+            img_hash = tbr.compute_imghash(image)
 
             await ctx.admin_db.del_imghash(img_hash)
 
