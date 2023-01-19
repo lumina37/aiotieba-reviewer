@@ -16,10 +16,10 @@ async def _default_comment_runner(comment: Comment) -> Optional[Punish]:
             return punish
 
 
-comment_runner = _default_comment_runner
+runner = _default_comment_runner
 
 
 def set_comment_runner(new_runner: TypeCommentRunner) -> TypeCommentRunner:
-    global comment_runner
-    comment_runner = new_runner
+    global runner
+    runner = new_runner
     return new_runner

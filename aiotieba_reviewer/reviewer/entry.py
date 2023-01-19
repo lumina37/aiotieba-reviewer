@@ -23,7 +23,7 @@ async def run(time_interval: float = 0.0) -> NoReturn:
     comment.set_checker(True, True)(comment.checker.ori_checker)
 
     while 1:
-        await threads.runner.threads_runner(client._fname)
+        await threads.runner.runner(client._fname)
         await asyncio.sleep(time_interval)
 
 
@@ -40,7 +40,7 @@ async def run_with_dyn_interval(dyn_interval: Generator[float, None, None]) -> N
     comment.set_checker(True, True)(comment.checker.ori_checker)
 
     for time_interval in dyn_interval:
-        await threads.runner.threads_runner(client._fname)
+        await threads.runner.runner(client._fname)
         if time_interval:
             await asyncio.sleep(time_interval)
 
@@ -53,11 +53,11 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(64, 0, -1)) ->
         pn_gen (Generator[int, None, None], optional): 页码生成器. Defaults to range(64, 0, -1).
     """
 
-    thread.runner.set_thread_runner(True)(thread.runner.ori_thread_runner)
-    threads.runner.set_threads_runner(True)(threads.runner.ori_threads_runner)
+    thread.runner.set_thread_runner(True)(thread.runner.ori_runner)
+    threads.runner.set_threads_runner(True)(threads.runner.ori_runner)
 
     for pn in pn_gen:
-        await threads.runner.threads_runner(client._fname, pn)
+        await threads.runner.runner(client._fname, pn)
 
 
 async def test(tid: int, pid: int, is_floor: bool = False) -> Optional[Punish]:
@@ -84,9 +84,9 @@ def no_test() -> None:
     """
 
     executor.punish_executor = executor.default_punish_executor
-    thread.runner.set_thread_runner(False)(thread.runner.ori_thread_runner)
-    threads.runner.set_threads_runner(False)(threads.runner.ori_threads_runner)
+    thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
+    threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
     yield
     executor.punish_executor = executor.default_punish_executor_test
-    thread.runner.set_thread_runner(True)(thread.runner.ori_thread_runner)
-    threads.runner.set_threads_runner(True)(threads.runner.ori_threads_runner)
+    thread.runner.set_thread_runner(True)(thread.runner.ori_runner)
+    threads.runner.set_threads_runner(True)(threads.runner.ori_runner)

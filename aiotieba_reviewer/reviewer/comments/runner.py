@@ -4,7 +4,7 @@ from typing import Awaitable, Callable, Optional
 from ... import executor
 from ..._typing import Post
 from ...punish import Punish
-from ..comment import runner
+from ..comment import runner as c_runner
 from . import filter, producer
 
 TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
@@ -27,7 +27,7 @@ async def _default_comments_runner(post: Post) -> Optional[Punish]:
                     punish |= _punish
             return punish
 
-    punishes = await asyncio.gather(*[runner.comment_runner(c) for c in comments])
+    punishes = await asyncio.gather(*[c_runner.runner(c) for c in comments])
     if punishes:
         punish = Punish(post)
         for _punish in punishes:

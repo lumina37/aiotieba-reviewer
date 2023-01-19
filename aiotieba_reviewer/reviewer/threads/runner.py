@@ -5,7 +5,7 @@ from aiotieba import LOG
 
 from ... import executor
 from ...perf_stat import aperf_stat
-from ..thread import runner
+from ..thread import runner as t_runner
 from . import filter, producer
 
 TypeThreadsRunner = Callable[[str, int], Awaitable[None]]
@@ -29,7 +29,7 @@ async def _default_threads_runner(fname: str, pn: int = 1) -> None:
         await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
 
     for thread in threads:
-        await runner.thread_runner(thread)
+        await t_runner.runner(thread)
 
 
 def _threads_runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
@@ -43,17 +43,17 @@ def _threads_runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
     return _
 
 
-ori_threads_runner = _default_threads_runner
-threads_runner = _threads_runner_perf_stat(ori_threads_runner)
+ori_runner = _default_threads_runner
+runner = _threads_runner_perf_stat(ori_runner)
 
 
 def set_threads_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadsRunner], TypeThreadsRunner]:
     def _(new_runner: TypeThreadsRunner) -> TypeThreadsRunner:
-        global ori_threads_runner, threads_runner
-        ori_threads_runner = new_runner
-        threads_runner = ori_threads_runner
+        global ori_runner, runner
+        ori_runner = new_runner
+        runner = ori_runner
         if enable_perf_log:
-            threads_runner = _threads_runner_perf_stat(threads_runner)
-        return ori_threads_runner
+            runner = _threads_runner_perf_stat(runner)
+        return ori_runner
 
     return _

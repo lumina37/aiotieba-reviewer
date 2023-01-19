@@ -16,7 +16,7 @@ async def _default_thread_runner(thread: Thread) -> None:
     if punish is not None:
         await executor.punish_executor(punish)
 
-    punish = await posts.runner.posts_runner(thread)
+    punish = await posts.runner.runner(thread)
     if punish is not None:
         punish.obj = thread
         await executor.punish_executor(punish)
@@ -33,17 +33,17 @@ def _thread_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
     return _
 
 
-ori_thread_runner = _default_thread_runner
-thread_runner = _thread_runner_perf_stat(ori_thread_runner)
+ori_runner = _default_thread_runner
+runner = _thread_runner_perf_stat(ori_runner)
 
 
 def set_thread_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadRunner], TypeThreadRunner]:
     def _(new_runner: TypeThreadRunner) -> TypeThreadRunner:
-        global ori_thread_runner, thread_runner
-        ori_thread_runner = new_runner
-        thread_runner = ori_thread_runner
+        global ori_runner, runner
+        ori_runner = new_runner
+        runner = ori_runner
         if enable_perf_log:
-            thread_runner = _thread_runner_perf_stat(thread_runner)
-        return ori_thread_runner
+            runner = _thread_runner_perf_stat(runner)
+        return ori_runner
 
     return _
