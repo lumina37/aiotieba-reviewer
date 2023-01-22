@@ -9,7 +9,7 @@ from . import checker
 TypePostRunner = Callable[[Post], Awaitable[Optional[Punish]]]
 
 
-async def _default_post_runner(post: Post) -> Optional[Punish]:
+async def default_runner(post: Post) -> Optional[Punish]:
     punish = await checker.checker(post)
     if punish is not None:
         punish = await executor.punish_executor(punish)
@@ -22,7 +22,7 @@ async def _default_post_runner(post: Post) -> Optional[Punish]:
         return punish
 
 
-post_runner = _default_post_runner
+post_runner = default_runner
 
 
 def set_post_runner(new_runner: TypePostRunner) -> TypePostRunner:

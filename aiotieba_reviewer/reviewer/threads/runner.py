@@ -11,7 +11,7 @@ from . import filter, producer
 TypeThreadsRunner = Callable[[str, int], Awaitable[None]]
 
 
-async def _default_runner(fname: str, pn: int = 1) -> None:
+async def default_runner(fname: str, pn: int = 1) -> None:
 
     threads = await producer.producer(fname, pn)
 
@@ -38,7 +38,7 @@ def _threads_runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
     return _
 
 
-ori_runner = _default_runner
+ori_runner = default_runner
 runner = _threads_runner_perf_stat(ori_runner)
 
 

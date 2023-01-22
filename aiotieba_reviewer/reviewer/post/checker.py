@@ -8,7 +8,7 @@ from ..user_checker import user_checker
 TypePostChecker = Callable[[Post], Awaitable[Optional[Punish]]]
 
 
-def post_id_checker(func):
+def id_checker(func):
     """
     装饰器: 使用历史状态缓存避免重复检查
     """
@@ -32,11 +32,11 @@ def post_id_checker(func):
     return _
 
 
-async def _default_post_checker(post: Post) -> Optional[Punish]:
+async def default_checker(post: Post) -> Optional[Punish]:
     pass
 
 
-ori_checker = _default_post_checker
+ori_checker = default_checker
 checker = user_checker(ori_checker)
 
 
@@ -61,7 +61,7 @@ def set_checker(
         if enable_user_checker:
             checker = user_checker(checker)
         if enable_id_checker:
-            checker = post_id_checker(checker)
+            checker = id_checker(checker)
         return ori_checker
 
     return _

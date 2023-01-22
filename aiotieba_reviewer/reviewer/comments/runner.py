@@ -10,7 +10,11 @@ from . import filter, producer
 TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
 
 
-async def _default_runner(post: Post) -> Optional[Punish]:
+async def null_runner(post: Post) -> Optional[Punish]:
+    pass
+
+
+async def default_runner(post: Post) -> Optional[Punish]:
     comments = await producer.producer(post)
 
     for filt in filter.filters:
@@ -36,7 +40,7 @@ async def _default_runner(post: Post) -> Optional[Punish]:
         return punish
 
 
-comments_runner = _default_runner
+comments_runner = null_runner
 
 
 def set_comments_runner(new_runner: TypeCommentsRunner) -> TypeCommentsRunner:

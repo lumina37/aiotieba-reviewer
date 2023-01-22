@@ -8,7 +8,7 @@ from ..user_checker import user_checker
 TypeCommentChecker = Callable[[Comment], Awaitable[Optional[Punish]]]
 
 
-def comment_id_checker(func):
+def id_checker(func):
     """
     装饰器: 使用历史状态缓存避免重复检查
     """
@@ -27,11 +27,11 @@ def comment_id_checker(func):
     return _
 
 
-async def _default_comment_checker(comment: Comment) -> Optional[Punish]:
+async def default_checker(comment: Comment) -> Optional[Punish]:
     pass
 
 
-ori_checker = _default_comment_checker
+ori_checker = default_checker
 checker = user_checker(ori_checker)
 
 
@@ -56,7 +56,7 @@ def set_checker(
         if enable_user_checker:
             checker = user_checker(checker)
         if enable_id_checker:
-            checker = comment_id_checker(checker)
+            checker = id_checker(checker)
         return ori_checker
 
     return _

@@ -8,7 +8,7 @@ from ..user_checker import user_checker
 TypeThreadChecker = Callable[[Thread], Awaitable[Optional[Punish]]]
 
 
-def thread_id_checker(func):
+def id_checker(func):
     """
     装饰器: 使用历史状态缓存避免重复检查
     """
@@ -76,7 +76,7 @@ def set_checker(
         if enable_user_checker:
             checker = user_checker(checker)
         if enable_id_checker:
-            checker = thread_id_checker(checker)
+            checker = id_checker(checker)
         return ori_checker
 
     return _

@@ -8,7 +8,7 @@ from . import checker
 TypeCommentRunner = Callable[[Comment], Awaitable[Optional[Punish]]]
 
 
-async def _default_comment_runner(comment: Comment) -> Optional[Punish]:
+async def default_runner(comment: Comment) -> Optional[Punish]:
     punish = await checker.checker(comment)
     if punish is not None:
         punish = await executor.punish_executor(punish)
@@ -16,7 +16,7 @@ async def _default_comment_runner(comment: Comment) -> Optional[Punish]:
             return punish
 
 
-runner = _default_comment_runner
+runner = default_runner
 
 
 def set_comment_runner(new_runner: TypeCommentRunner) -> TypeCommentRunner:

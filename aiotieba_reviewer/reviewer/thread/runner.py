@@ -11,7 +11,7 @@ from . import checker
 TypeThreadRunner = Callable[[Thread], Awaitable[None]]
 
 
-async def _default_runner(thread: Thread) -> None:
+async def default_runner(thread: Thread) -> None:
     punish = await checker.checker(thread)
     if punish is not None:
         await executor.punish_executor(punish)
@@ -22,7 +22,7 @@ async def _default_runner(thread: Thread) -> None:
         await executor.punish_executor(punish)
 
 
-def _thread_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
+def thread_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
     perf_stat = aperf_stat()
 
     async def _(thread: Thread) -> None:
@@ -33,8 +33,8 @@ def _thread_runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
     return _
 
 
-ori_runner = _default_runner
-runner = _thread_runner_perf_stat(ori_runner)
+ori_runner = default_runner
+runner = thread_runner_perf_stat(ori_runner)
 
 
 def set_thread_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadRunner], TypeThreadRunner]:
@@ -43,7 +43,7 @@ def set_thread_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadRunn
         ori_runner = new_runner
         runner = ori_runner
         if enable_perf_log:
-            runner = _thread_runner_perf_stat(runner)
+            runner = thread_runner_perf_stat(runner)
         return ori_runner
 
     return _
