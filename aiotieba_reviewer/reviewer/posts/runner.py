@@ -13,11 +13,6 @@ TypePostsRunner = Callable[[Thread], Awaitable[Optional[Punish]]]
 async def _default_posts_runner(thread: Thread) -> Optional[Punish]:
     posts = await producer.producer(thread)
 
-    for _filter in filter.filters:
-        _posts = await _filter(posts)
-        if _posts is not None:
-            posts = _posts
-
     for filt in filter.filters:
         punishes = await filt(posts)
         if punishes is None:

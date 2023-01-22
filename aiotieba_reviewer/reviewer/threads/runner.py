@@ -15,11 +15,6 @@ async def _default_threads_runner(fname: str, pn: int = 1) -> None:
 
     threads = await producer.producer(fname, pn)
 
-    for _filter in filter.filters:
-        _threads = await _filter(threads)
-        if _threads is not None:
-            threads = _threads
-
     for filt in filter.filters:
         punishes = await filt(threads)
         if punishes is None:
