@@ -1,15 +1,18 @@
-import asyncio
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Comment, Post
-from ...classdef import Punish
-from . import checker, filter, producer
+from ..._typing import Comment
+from ...punish import Punish
+from . import checker
 
 TypeCommentRunner = Callable[[Comment], Awaitable[Optional[Punish]]]
 
 
-async def _default_comment_runner(comment: Comment) -> Optional[Punish]:
+async def __null_runner(_):
+    pass
+
+
+async def __default_runner(comment: Comment) -> Optional[Punish]:
     punish = await checker.checker(comment)
     if punish is not None:
         punish = await executor.punish_executor(punish)
@@ -17,39 +20,37 @@ async def _default_comment_runner(comment: Comment) -> Optional[Punish]:
             return punish
 
 
-comment_runner = _default_comment_runner
+runner: TypeCommentRunner = __null_runner
+
+
+def __switch_runner() -> bool:
+    global runner
+
+    if runner is __null_runner:
+        runner = __default_runner
+        return False
+
+    else:
+        return True
+
+
+_set_runner_hook = None
+
+
+def __hook():
+    if __switch_runner():
+        return
+    _set_runner_hook()
+
+
+# 下层checker被定义时应当通过__hook使能所有上层runner
+checker._set_checker_hook = __hook
 
 
 def set_comment_runner(new_runner: TypeCommentRunner) -> TypeCommentRunner:
-    global comment_runner
-    comment_runner = new_runner
-    return new_runner
+    _set_runner_hook()
 
+    global runner
+    runner = new_runner
 
-TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
-
-
-async def _default_comments_runner(post: Post) -> Optional[Punish]:
-    comments = await producer.producer(post)
-
-    for _filter in filter.filters:
-        _comments = await _filter(comments)
-        if _comments is not None:
-            comments = _comments
-
-    punishes = await asyncio.gather(*[comment_runner(c) for c in comments])
-    if punishes:
-        punish = Punish(post)
-        for _punish in punishes:
-            if _punish is not None:
-                punish |= _punish
-        return punish
-
-
-comments_runner = _default_comments_runner
-
-
-def set_comments_runner(new_runner: TypeCommentsRunner) -> TypeCommentsRunner:
-    global comments_runner
-    comments_runner = new_runner
     return new_runner

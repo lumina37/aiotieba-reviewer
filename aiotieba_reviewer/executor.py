@@ -3,9 +3,9 @@ from typing import Awaitable, Callable, Optional, Protocol
 
 from aiotieba import LOG
 
-from .classdef import Punish
 from .client import get_client, get_fname
 from .enum import Ops
+from .punish import Punish
 
 
 class TypeDeleteList(Protocol):
@@ -25,6 +25,13 @@ class DeleteList(object):
         如果在计划的删除任务实施前，因为列表长度超限而触发了一次删除
         那么计划的删除任务会被取消
     """
+
+    __slots__ = [
+        '_execute_timeout',
+        '_maxlen',
+        '_delete_task',
+        '_pids',
+    ]
 
     def __init__(self, execute_timeout: float = 10.0, maxlen=30) -> None:
         self._execute_timeout = execute_timeout
@@ -90,13 +97,16 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
     op = punish.op
     if op == Ops.NORMAL:
         return
-    if op == Ops.WHITE:
-        return
     if op == Ops.DELETE:
         LOG().info(
             f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
         )
         await delete_list.append(punish.obj.pid)
+        return
+    if op == Ops.DEBUG:
+        LOG().info(
+            f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+        )
         return
     if op == Ops.HIDE:
         LOG().info(
@@ -131,13 +141,16 @@ class _punish_executor_test(object):
         op = punish.op
         if op == Ops.NORMAL:
             return
-        if op == Ops.WHITE:
-            return
         if op == Ops.DELETE:
             LOG().info(
                 f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
             )
             self.punishes.append(punish)
+            return
+        if op == Ops.DEBUG:
+            LOG().info(
+                f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+            )
             return
         if op == Ops.HIDE:
             LOG().info(

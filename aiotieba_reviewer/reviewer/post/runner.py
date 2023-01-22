@@ -1,62 +1,63 @@
-import asyncio
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Post, Thread
-from ...classdef import Punish
-from .. import comment
-from . import checker, filter, producer
+from ..._typing import Post
+from ...punish import Punish
+from .. import comments
+from . import checker
 
 TypePostRunner = Callable[[Post], Awaitable[Optional[Punish]]]
 
 
-async def _default_post_runner(post: Post) -> Optional[Punish]:
+async def __null_runner(_):
+    pass
+
+
+async def __default_runner(post: Post) -> Optional[Punish]:
     punish = await checker.checker(post)
     if punish is not None:
         punish = await executor.punish_executor(punish)
         if punish is not None:
             return punish
 
-    punish = await comment.runner.comments_runner(post)
+    punish = await comments.runner.runner(post)
     if punish is not None:
         punish.obj = post
         return punish
 
 
-post_runner = _default_post_runner
+runner: TypePostRunner = __null_runner
+
+
+def __switch_runner() -> bool:
+    global runner
+
+    if runner is __null_runner:
+        runner = __default_runner
+        return False
+
+    else:
+        return True
+
+
+_set_runner_hook = None
+
+
+def __hook():
+    if __switch_runner():
+        return
+    _set_runner_hook()
+
+
+# 下层checker被定义时应当通过__hook使能所有上层runner
+checker._set_checker_hook = __hook
+comments.runner._set_runner_hook = __hook
 
 
 def set_post_runner(new_runner: TypePostRunner) -> TypePostRunner:
-    global post_runner
-    post_runner = new_runner
-    return new_runner
+    _set_runner_hook()
 
+    global runner
+    runner = new_runner
 
-TypePostsRunner = Callable[[Thread], Awaitable[Optional[Punish]]]
-
-
-async def _default_posts_runner(thread: Thread) -> Optional[Punish]:
-    posts = await producer.producer(thread)
-
-    for _filter in filter.filters:
-        _posts = await _filter(posts)
-        if _posts is not None:
-            posts = _posts
-
-    punishes = await asyncio.gather(*[post_runner(p) for p in posts])
-    punishes = [p for p in punishes if p is not None]
-    if punishes:
-        punish = Punish(thread)
-        for _punish in punishes:
-            if _punish is not None:
-                punish |= _punish
-        return punish
-
-
-posts_runner = _default_posts_runner
-
-
-def set_posts_runner(new_runner: TypePostsRunner) -> TypePostsRunner:
-    global posts_runner
-    posts_runner = new_runner
     return new_runner

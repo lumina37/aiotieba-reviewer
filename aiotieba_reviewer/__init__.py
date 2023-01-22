@@ -1,7 +1,6 @@
-from . import executor, reviewer, utils
+from . import executor, imgproc, reviewer
 from .__version__ import __version__
 from ._typing import Comment, Post, Thread, TypeObj
-from .classdef import Punish
 from .client import (
     client_generator,
     db_generator,
@@ -14,5 +13,7 @@ from .client import (
 )
 from .database import MySQLDB, SQLiteDB
 from .enum import Ops
+from .imgproc import compute_imghash, decode_QRcode, get_imghash, get_imghash_full, has_QRcode
 from .perf_stat import aperf_stat
-from .reviewer import no_test, run, run_multi_pn, run_with_dyn_interval
+from .punish import Punish
+from .reviewer import no_test, run, run_multi_pn, run_with_dyn_interval, test
