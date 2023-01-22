@@ -10,7 +10,7 @@ from . import filter, producer
 TypePostsRunner = Callable[[Thread], Awaitable[Optional[Punish]]]
 
 
-async def _default_posts_runner(thread: Thread) -> Optional[Punish]:
+async def _default_runner(thread: Thread) -> Optional[Punish]:
     posts = await producer.producer(thread)
 
     for filt in filter.filters:
@@ -37,7 +37,7 @@ async def _default_posts_runner(thread: Thread) -> Optional[Punish]:
         return punish
 
 
-runner = _default_posts_runner
+runner = _default_runner
 
 
 def set_posts_runner(new_runner: TypePostsRunner) -> TypePostsRunner:

@@ -6,7 +6,7 @@ from ...client import get_client
 TypeCommentsProducer = Callable[[Post], Awaitable[List[Comment]]]
 
 
-async def _default_comments_producer(post: Post) -> List[Comment]:
+async def _default_producer(post: Post) -> List[Comment]:
 
     client = await get_client()
 
@@ -23,7 +23,7 @@ async def _default_comments_producer(post: Post) -> List[Comment]:
     return comment_list
 
 
-producer = _default_comments_producer
+producer = _default_producer
 
 
 def set_producer(new_producer: TypeCommentsProducer) -> TypeCommentsProducer:
