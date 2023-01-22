@@ -20,7 +20,7 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
     """
 
     async def _client_generator():
-        async with aiotieba.Client(BDUSS_key, proxy=True) as client:
+        async with aiotieba.Client(BDUSS_key) as client:
             while 1:
                 yield client
 
