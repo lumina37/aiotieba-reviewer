@@ -11,11 +11,14 @@ from . import filter, producer
 TypeThreadsRunner = Callable[[str, int], Awaitable[None]]
 
 
-async def default_runner(fname: str, pn: int = 1) -> None:
+async def __null_runner(_):
+    pass
 
+
+async def __default_runner(fname: str, pn: int = 1) -> None:
     threads = await producer.producer(fname, pn)
 
-    for filt in filter.filters:
+    for filt in filter._filters:
         punishes = await filt(threads)
         if punishes is None:
             continue
@@ -27,7 +30,7 @@ async def default_runner(fname: str, pn: int = 1) -> None:
         await t_runner.runner(thread)
 
 
-def _threads_runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
+def __runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
     perf_stat = aperf_stat()
 
     async def _(fname: str, pn: int = 1) -> None:
@@ -38,8 +41,30 @@ def _threads_runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
     return _
 
 
-ori_runner = default_runner
-runner = _threads_runner_perf_stat(ori_runner)
+ori_runner = __null_runner
+runner = __null_runner
+
+
+def __switch_runner() -> bool:
+    global ori_runner, runner
+
+    if ori_runner is __null_runner:
+        ori_runner = __default_runner
+        runner = __runner_perf_stat(ori_runner)
+        return False
+
+    else:
+        return True
+
+
+def __hook():
+    if __switch_runner():
+        return
+
+
+# 下层checker被定义时应当通过__hook使能所有上层runner
+filter._append_filter_hook = __hook
+t_runner._set_runner_hook = __hook
 
 
 def set_threads_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadsRunner], TypeThreadsRunner]:
@@ -47,8 +72,10 @@ def set_threads_runner(enable_perf_log: bool = False) -> Callable[[TypeThreadsRu
         global ori_runner, runner
         ori_runner = new_runner
         runner = ori_runner
+
         if enable_perf_log:
-            runner = _threads_runner_perf_stat(runner)
+            runner = __runner_perf_stat(runner)
+
         return ori_runner
 
     return _

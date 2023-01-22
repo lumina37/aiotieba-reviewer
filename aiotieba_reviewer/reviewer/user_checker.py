@@ -6,7 +6,7 @@ from ..enum import Ops
 from ..punish import Punish
 
 
-def user_checker(func):
+def _user_checker(func):
     """
     装饰器: 检查发帖用户的黑白名单状态
 

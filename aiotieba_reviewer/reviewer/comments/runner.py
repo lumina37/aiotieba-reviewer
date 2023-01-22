@@ -10,14 +10,14 @@ from . import filter, producer
 TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
 
 
-async def null_runner(post: Post) -> Optional[Punish]:
+async def __null_runner(_):
     pass
 
 
-async def default_runner(post: Post) -> Optional[Punish]:
+async def __default_runner(post: Post) -> Optional[Punish]:
     comments = await producer.producer(post)
 
-    for filt in filter.filters:
+    for filt in filter._filters:
         punishes = await filt(comments)
         if punishes is None:
             continue
@@ -40,10 +40,38 @@ async def default_runner(post: Post) -> Optional[Punish]:
         return punish
 
 
-comments_runner = null_runner
+runner: TypeCommentsRunner = __null_runner
+
+
+def __switch_runner() -> bool:
+    global runner
+
+    if runner is __null_runner:
+        runner = __default_runner
+        return False
+
+    else:
+        return True
+
+
+_set_runner_hook = None
+
+
+def __hook():
+    if __switch_runner():
+        return
+    _set_runner_hook()
+
+
+# 下层checker被定义时应当通过__hook使能所有上层runner
+filter._append_filter_hook = __hook
+c_runner._set_runner_hook = __hook
 
 
 def set_comments_runner(new_runner: TypeCommentsRunner) -> TypeCommentsRunner:
-    global comments_runner
-    comments_runner = new_runner
+    _set_runner_hook()
+
+    global runner
+    runner = new_runner
+
     return new_runner

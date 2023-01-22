@@ -5,9 +5,12 @@ from ...punish import Punish
 
 TypeThreadsFilter = Callable[[List[Thread]], Awaitable[Optional[List[Punish]]]]
 
-filters: List[TypeThreadsFilter] = []
+_filters: List[TypeThreadsFilter] = []
+
+_append_filter_hook = None
 
 
 def append_filter(new_filter: TypeThreadsFilter) -> TypeThreadsFilter:
-    filters.append(new_filter)
+    _append_filter_hook()
+    _filters.append(new_filter)
     return new_filter

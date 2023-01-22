@@ -5,9 +5,12 @@ from ...punish import Punish
 
 TypePostsFilter = Callable[[List[Post]], Awaitable[Optional[List[Punish]]]]
 
-filters: List[TypePostsFilter] = []
+_filters: List[TypePostsFilter] = []
+
+_append_filter_hook = None
 
 
 def append_filter(new_filter: TypePostsFilter) -> TypePostsFilter:
-    filters.append(new_filter)
+    _append_filter_hook()
+    _filters.append(new_filter)
     return new_filter

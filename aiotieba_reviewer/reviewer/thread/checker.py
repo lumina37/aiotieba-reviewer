@@ -3,12 +3,12 @@ from typing import Awaitable, Callable, Optional
 from ... import client
 from ..._typing import Thread
 from ...punish import Punish
-from ..user_checker import user_checker
+from ..user_checker import _user_checker
 
 TypeThreadChecker = Callable[[Thread], Awaitable[Optional[Punish]]]
 
 
-def id_checker(func):
+def __id_checker(func):
     """
     装饰器: 使用历史状态缓存避免重复检查
     """
@@ -32,7 +32,7 @@ def id_checker(func):
     return _
 
 
-def set_thread_user_level(func):
+def __set_thread_user_level(func):
     """
     装饰器: 填补发帖用户等级
     """
@@ -46,12 +46,15 @@ def set_thread_user_level(func):
     return _
 
 
-async def _default_checker(thread: Thread) -> Optional[Punish]:
+async def __default_checker(_):
     pass
 
 
-ori_checker = _default_checker
-checker = user_checker(ori_checker)
+ori_checker: TypeThreadChecker = __default_checker
+checker: TypeThreadChecker = _user_checker(ori_checker)
+
+
+_set_checker_hook = None
 
 
 def set_checker(
@@ -69,14 +72,21 @@ def set_checker(
     """
 
     def _(new_checker: TypeThreadChecker) -> TypeThreadChecker:
+        if new_checker is __default_checker:
+            return new_checker
+
+        _set_checker_hook()
+
         global ori_checker, checker
         ori_checker = new_checker
         checker = ori_checker
-        checker = set_thread_user_level(checker)
+
+        checker = __set_thread_user_level(checker)
         if enable_user_checker:
-            checker = user_checker(checker)
+            checker = _user_checker(checker)
         if enable_id_checker:
-            checker = id_checker(checker)
+            checker = __id_checker(checker)
+
         return ori_checker
 
     return _

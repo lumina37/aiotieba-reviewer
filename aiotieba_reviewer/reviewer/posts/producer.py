@@ -6,7 +6,7 @@ from ...client import get_client
 TypePostsProducer = Callable[[Thread], Awaitable[List[Post]]]
 
 
-async def default_producer(thread: Thread) -> List[Post]:
+async def __default_producer(thread: Thread) -> List[Post]:
 
     client = await get_client()
 
@@ -27,7 +27,7 @@ async def default_producer(thread: Thread) -> List[Post]:
     return post_list
 
 
-producer = default_producer
+producer = __default_producer
 
 
 def set_producer(new_producer: TypePostsProducer) -> TypePostsProducer:
