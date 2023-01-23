@@ -1,6 +1,6 @@
 site_name: aiotieba_reviewer
 site_description: aiotieba-reviewer开发文档
-site_url: https://aiotieba-reviewer.starry-ovo.cn/
+site_url: https://review.aiotieba.cc/
 
 theme:
   name: material
