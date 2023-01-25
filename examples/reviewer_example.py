@@ -24,7 +24,7 @@ async def _check_post(post: Post) -> Optional[Punish]:
         return Punish(post, Ops.DELETE, note="闪光弹")
 
 
-@tbr.reviewer.comment.set_producer
+@tbr.reviewer.comments.set_producer
 async def comments_producer(post: Post) -> List[Comment]:
     return post.comments
 
