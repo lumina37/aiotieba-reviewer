@@ -1,9 +1,20 @@
 site_name: aiotieba_reviewer
 site_description: aiotieba-reviewer开发文档
-site_url: https://aiotieba-reviewer.starry-ovo.cn/
+site_url: https://review.aiotieba.cc/
 
 theme:
   name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.sections
   language: zh
@@ -12,8 +23,8 @@ repo_name: Starry-OvO/aiotieba-reviewer
 repo_url: https://github.com/Starry-OvO/aiotieba-reviewer
 
 nav:
-    - 介绍: index.md
-    - 教程:
+  - 介绍: index.md
+  - 教程:
       - 云审查教程: tutorial/reviewer.md
       - 指令管理器使用教程: tutorial/cmd_handler_user.md
       - 指令管理器配置教程: tutorial/cmd_handler_dev.md
@@ -25,4 +36,4 @@ markdown_extensions:
       css_class: highlight
 
 extra_css:
-    - css/custom.css
+  - css/custom.css
