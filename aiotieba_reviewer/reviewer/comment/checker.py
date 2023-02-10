@@ -15,7 +15,7 @@ def __id_checker(func):
 
     async def _(comment: Comment) -> Optional[Punish]:
 
-        if client._db_sqlite.get_id(comment.pid) is not None:
+        if client._db_sqlite.get_id(comment.pid) != -1:
             return
 
         punish = await func(comment)
