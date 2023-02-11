@@ -245,7 +245,7 @@ class Listener(object):
 
     async def close(self) -> None:
         await asyncio.gather(
-            *[c.close() for c in itertools.chain.from_iterable(self.admins.values())], self.listener.close()
+            *[c.__aexit__() for c in itertools.chain.from_iterable(self.admins.values())], self.listener.__aexit__()
         )
 
     async def __aenter__(self) -> "Listener":
@@ -371,7 +371,7 @@ class Listener(object):
         屏蔽指令所在主题帖
         """
 
-        if await ctx.admin.hide_thread(ctx.fname,ctx.tid):
+        if await ctx.admin.hide_thread(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=0)
@@ -419,7 +419,7 @@ class Listener(object):
         user = await self._arg2user_info(ctx.args[0])
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
-        if await ctx.admin.block(user.portrait, day=day, reason=note):
+        if await ctx.admin.block(ctx.fname, user.portrait, day=day, reason=note):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=1)
@@ -777,7 +777,7 @@ class Listener(object):
         将指令所在主题帖标记为无关水，并临时屏蔽
         """
 
-        if await ctx.admin_db.add_tid(ctx.tid, tag=1) and await ctx.admin.hide_thread(ctx.fname,ctx.tid):
+        if await ctx.admin_db.add_tid(ctx.tid, tag=1) and await ctx.admin.hide_thread(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=0)

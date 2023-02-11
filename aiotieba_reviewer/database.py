@@ -70,11 +70,6 @@ class MySQLDB(object):
         await self._create_pool()
         return self
 
-    async def close(self) -> None:
-        if self._pool is not None:
-            self._pool.close()
-            await self._pool.wait_closed()
-
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
