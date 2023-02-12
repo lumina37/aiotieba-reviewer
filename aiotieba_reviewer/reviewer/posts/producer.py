@@ -7,7 +7,6 @@ TypePostsProducer = Callable[[Thread], Awaitable[List[Post]]]
 
 
 async def __default_producer(thread: Thread) -> List[Post]:
-
     client = await get_client()
 
     if thread.reply_num > 30:

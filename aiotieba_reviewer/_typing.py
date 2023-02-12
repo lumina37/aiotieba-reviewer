@@ -1,7 +1,7 @@
 from typing import Union
 
-from aiotieba.client.get_comments._classdef import Comment
-from aiotieba.client.get_posts._classdef import Post
-from aiotieba.client.get_threads._classdef import Thread
+from aiotieba.client.get_comments import Comment
+from aiotieba.client.get_posts import Post
+from aiotieba.client.get_threads import Thread
 
 TypeObj = Union[Thread, Post, Comment]

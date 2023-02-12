@@ -14,7 +14,6 @@ def __id_checker(func):
     """
 
     async def _(comment: Comment) -> Optional[Punish]:
-
         if client._db_sqlite.get_id(comment.pid) is not None:
             return
 
@@ -55,7 +54,7 @@ def set_checker(
     def _(new_checker: TypeCommentChecker) -> TypeCommentChecker:
         if new_checker is __default_checker:
             return new_checker
-        
+
         _set_checker_hook()
 
         global ori_checker, checker

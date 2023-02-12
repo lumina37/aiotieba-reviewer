@@ -2,7 +2,7 @@ from typing import Optional
 
 from .._typing import TypeObj
 from ..client import get_db
-from ..enum import Ops
+from ..enums import Ops
 from ..punish import Punish
 
 

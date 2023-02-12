@@ -4,7 +4,7 @@ from typing import Awaitable, Callable, Optional, Protocol
 from aiotieba import LOG
 
 from .client import get_client, get_fname
-from .enum import Ops
+from .enums import Ops
 from .punish import Punish
 
 
@@ -89,7 +89,6 @@ TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
 
 
 async def default_punish_executor(punish: Punish) -> Optional[Punish]:
-
     if day := punish.day:
         client = await get_client()
         await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
@@ -127,14 +126,12 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
 
 
 class _punish_executor_test(object):
-
     __slots__ = ['punishes']
 
     def __init__(self) -> None:
         self.punishes = []
 
     async def __call__(self, punish: Punish) -> Optional[Punish]:
-
         if day := punish.day:
             LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
 

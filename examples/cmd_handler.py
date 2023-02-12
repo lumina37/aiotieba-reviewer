@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import aiotieba as tb
 from aiotieba._config import tomllib
-from aiotieba.client._classdef import FragImage
-from aiotieba.client.get_ats._classdef import At
+from aiotieba.client.get_ats import At
+from aiotieba.client.get_threads import ShareThread
 
 import aiotieba_reviewer as tbr
 
@@ -33,7 +33,6 @@ class TimerRecorder(object):
     __slots__ = ['last_parse_time', 'last_post_time', 'post_interval']
 
     def __init__(self, shift_sec: float, post_interval: float) -> None:
-
         self.last_post_time: float = 0
         self.post_interval: float = post_interval
         self.last_parse_time: float = time.time() - shift_sec
@@ -52,7 +51,6 @@ class TimerRecorder(object):
 
 
 class Context(object):
-
     __slots__ = [
         '__dict__',
         'at',
@@ -79,7 +77,7 @@ class Context(object):
         self._cmd_type = None
         self._note = None
         self.exec_permission: int = 0
-        self.parent: Union[tb.ShareThread, tb.Thread, tb.Post] = None
+        self.parent: Union[ShareThread, tb.Thread, tb.Post] = None
 
     async def _init(self) -> bool:
         self.exec_permission = await self.admin_db.get_user_id(self.user.user_id)
@@ -90,7 +88,6 @@ class Context(object):
         return True
 
     async def _init_full(self) -> bool:
-
         if self._init_full_success:
             return True
 
@@ -197,7 +194,6 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0) -> _TypeComma
     def wrapper(func: _TypeCommandFunc) -> _TypeCommandFunc:
         @functools.wraps(func)
         async def _(self: "Listener", ctx: Context) -> None:
-
             try:
                 if ctx.fname not in self.admins:
                     raise RuntimeError(f"找不到管理员. fname={ctx.fname}")
@@ -222,11 +218,9 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0) -> _TypeComma
 
 
 class Listener(object):
-
     __slots__ = ['listener', 'admins', 'time_recorder']
 
     def __init__(self) -> None:
-
         self.listener = tb.Client(LISTEN_CONFIG['listener_key'])
 
         def _parse_config(_config: Dict[str, str]) -> Tuple[tb.Client, tbr.MySQLDB, tb.Client]:
@@ -260,7 +254,6 @@ class Listener(object):
         await self.close()
 
     async def run(self) -> None:
-
         while 1:
             try:
                 asyncio.create_task(self._fetch_and_execute_cmds())
@@ -304,9 +297,9 @@ class Listener(object):
         if tieba_uid := _get_num_between_two_signs(arg, '#'):
             user = await self.listener.tieba_uid2user_info(tieba_uid)
         elif user_id := _get_num_between_two_signs(arg, '/'):
-            user = await self.listener.get_user_info(user_id, tb.ReqUInfo.BASIC)
+            user = await self.listener.get_user_info(user_id, tb.enums.ReqUInfo.BASIC)
         else:
-            user = await self.listener.get_user_info(arg, tb.ReqUInfo.BASIC)
+            user = await self.listener.get_user_info(arg, tb.enums.ReqUInfo.BASIC)
 
         if not user:
             raise ValueError("找不到对应的用户")
@@ -482,7 +475,7 @@ class Listener(object):
                 if not ctx.parent.contents.ats:
                     raise ValueError("无法获取被转发帖的作者信息")
                 ctx.parent._user = await self.listener.get_user_info(
-                    ctx.parent.contents.ats[0].user_id, tb.ReqUInfo.BASIC
+                    ctx.parent.contents.ats[0].user_id, tb.enums.ReqUInfo.BASIC
                 )
 
                 tb.LOG().info(f"Try to del thread. text={ctx.parent.text} user={ctx.parent.user}")
@@ -666,7 +659,7 @@ class Listener(object):
             raise ValueError("speaker尚未冷却完毕")
 
         active_admin_list = [
-            (await self.listener.get_user_info(user_id, tb.ReqUInfo.USER_NAME)).user_name
+            (await self.listener.get_user_info(user_id, tb.enums.ReqUInfo.USER_NAME)).user_name
             for user_id in await ctx.admin_db.get_user_id_list(lower_permission=2, limit=5)
         ]
         extra_info = ctx.args[0] if len(ctx.args) else '无'
@@ -687,7 +680,7 @@ class Listener(object):
 
         if len(ctx.args) > 2:
             index = int(ctx.args[0])
-            imgs: List[FragImage] = imgs[index - 1 : index]
+            imgs: List[tb.typing.contents.FragImage] = imgs[index - 1 : index]
             permission = int(ctx.args[1])
             note = ctx.args[2]
         else:
@@ -698,7 +691,7 @@ class Listener(object):
             image = await self.listener.get_image(img.src)
             if image is None:
                 continue
-            img_hash = tbr.compute_imghash(image)
+            img_hash = tbr.imgproc.compute_imghash(image)
             if img_hash == 4412820541203793671:
                 continue
 
@@ -718,13 +711,13 @@ class Listener(object):
 
         if ctx.args:
             index = int(ctx.args[0])
-            imgs: List[FragImage] = imgs[index - 1 : index]
+            imgs: List[tb.typing.contents.FragImage] = imgs[index - 1 : index]
 
         for img in imgs:
             image = await self.listener.get_image(img.src)
             if image is None:
                 continue
-            img_hash = tbr.compute_imghash(image)
+            img_hash = tbr.imgproc.compute_imghash(image)
 
             await ctx.admin_db.del_imghash(img_hash)
 
@@ -804,7 +797,7 @@ class Listener(object):
             if await ctx.admin_db.add_tid(0, tag=0):
                 await ctx.admin.del_post(ctx.fname, ctx.pid)
             limit = 128
-            tids = await ctx.admin.get_tid_hide_list(limit=limit)
+            tids = await ctx.admin_db.get_tid_list(1, limit=limit)
             while 1:
                 for tid in tids:
                     if await ctx.admin.unhide_thread(ctx.fname, tid):
