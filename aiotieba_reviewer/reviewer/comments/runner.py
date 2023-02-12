@@ -22,7 +22,8 @@ async def __default_runner(post: Post) -> Optional[Punish]:
         if punishes is None:
             continue
         for punish in punishes:
-            comments.remove(punish.obj)
+            if punish:
+                comments.remove(punish.obj)
         punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
         if punishes:
             punish = Punish(post)
