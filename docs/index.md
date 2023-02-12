@@ -12,11 +12,6 @@ pip install aiotieba-reviewer
 
 [**云审查教程**](tutorial/reviewer.md)
 
-## 友情链接
-
-+ [另一个仍在活跃更新的贴吧管理器（有用户界面）](https://github.com/dog194/TiebaManager)
-+ [贴吧protobuf定义文件合集](https://github.com/n0099/tbclient.protobuf)
-
 ## 客户名单
 
 *2023.02.12更新*
