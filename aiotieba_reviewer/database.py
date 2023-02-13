@@ -6,9 +6,8 @@ from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
 import aiomysql
 from aiotieba import LOG
+from aiotieba._config import CONFIG
 from aiotieba.client.typing import UserInfo
-
-from ._config import CONFIG
 
 
 def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
@@ -64,7 +63,7 @@ class MySQLDB(object):
     _default_pool_recycle: Final[int] = 28800
 
     def __init__(self, fname: str = '') -> None:
-        self.fname: str = fname
+        self.fname = fname
         self._pool: aiomysql.Pool = None
 
     async def __aenter__(self) -> "MySQLDB":
@@ -81,7 +80,7 @@ class MySQLDB(object):
         创建连接池
         """
 
-        db_config: dict = CONFIG['Database']
+        db_config = CONFIG.get('Database', {})
         self._pool: aiomysql.Pool = await aiomysql.create_pool(
             user=db_config['user'],
             password=db_config['password'],
