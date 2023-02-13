@@ -169,7 +169,7 @@ class Context(object):
         return self.at.text
 
     @property
-    def user(self) -> tb.UserInfo:
+    def user(self) -> tb.typing.UserInfo:
         return self.at.user
 
     @property
@@ -283,7 +283,7 @@ class Listener(object):
         cmd_func = getattr(self, f'cmd_{ctx.cmd_type}', self.cmd_default)
         await cmd_func(ctx)
 
-    async def _arg2user_info(self, arg: str) -> tb.UserInfo:
+    async def _arg2user_info(self, arg: str) -> tb.typing.UserInfo:
         def _get_num_between_two_signs(_str: str, _sign: str) -> int:
             if (first_sign := _str.find(_sign)) == -1:
                 return 0
@@ -306,7 +306,9 @@ class Listener(object):
 
         return user
 
-    async def _cmd_set(self, ctx: Context, new_permission: int, note: str, user: Optional[tb.UserInfo] = None) -> bool:
+    async def _cmd_set(
+        self, ctx: Context, new_permission: int, note: str, user: Optional[tb.typing.UserInfo] = None
+    ) -> bool:
         """
         设置权限级别
         """
