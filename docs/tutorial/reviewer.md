@@ -33,7 +33,7 @@
 ## 使用方法
 
 + 首先，你需要一个`MySQL`数据库，用来缓存通过检测的内容id以及记录用户权限级别（黑、白名单）
-+ 参考[配置文件参考](https://aiotieba.cc/tutorial/config)，填写`Database`字段，以便aiotieba使用你的`MySQL`数据库。aiotieba将会在你第一次访问特定方法时自动创建数据库表，因此你无须手动建表
++ 参考[**该教程**](config.md)，填写`Database`字段，以便aiotieba使用你的`MySQL`数据库。aiotieba将会在你第一次访问特定方法时自动创建数据库表，因此你无须手动建表
 + 自定义审查行为：请参照我给出的例子自己编程修改[reviewer_example.py](https://github.com/Starry-OvO/aiotieba-reviewer/blob/develop/examples/reviewer_example.py)
 + 运行`your_reviewer.py`（对`Windows`平台，建议使用`pythonw.exe`无窗口运行，对`Linux`平台，建议使用如下的`nohup`指令在后台运行）
 

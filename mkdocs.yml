@@ -26,6 +26,7 @@ nav:
   - 介绍: index.md
   - 教程:
       - 云审查教程: tutorial/reviewer.md
+      - 配置文件参考: tutorial/config.md
       - 指令管理器使用教程: tutorial/cmd_handler_user.md
       - 指令管理器配置教程: tutorial/cmd_handler_dev.md
 
