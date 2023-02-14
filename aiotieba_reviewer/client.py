@@ -20,7 +20,7 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
     """
 
     async def _client_generator():
-        async with tb.Client(BDUSS_key, prefer_ws=True) as client:
+        async with tb.Client(BDUSS_key, enable_ws=True) as client:
             while 1:
                 yield client
 
