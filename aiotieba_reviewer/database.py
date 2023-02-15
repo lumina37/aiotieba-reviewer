@@ -6,8 +6,8 @@ from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
 import aiomysql
 from aiotieba import LOG
-from aiotieba._config import CONFIG
-from aiotieba.client.typing import UserInfo
+from aiotieba.config import CONFIG
+from aiotieba.typing import UserInfo
 
 
 def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
