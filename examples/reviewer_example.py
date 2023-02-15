@@ -3,8 +3,10 @@ import asyncio
 import re
 from typing import List, Optional
 
+from aiotieba.typing import Comment, Post
+
 import aiotieba_reviewer as tbr
-from aiotieba_reviewer import Comment, Ops, Post, Punish, TypeObj
+from aiotieba_reviewer import Ops, Punish, TypeObj
 
 
 @tbr.reviewer.post.set_checker()
