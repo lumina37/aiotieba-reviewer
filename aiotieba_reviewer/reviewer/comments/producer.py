@@ -7,7 +7,6 @@ TypeCommentsProducer = Callable[[Post], Awaitable[List[Comment]]]
 
 
 async def __default_producer(post: Post) -> List[Comment]:
-
     client = await get_client()
 
     reply_num = post.reply_num

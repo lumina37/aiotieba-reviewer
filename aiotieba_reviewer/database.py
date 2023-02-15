@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
 import aiomysql
-from aiotieba import LOG, UserInfo
-
-from ._config import CONFIG
+from aiotieba import LOG
+from aiotieba.config import CONFIG
+from aiotieba.typing import UserInfo
 
 
 def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
@@ -63,27 +63,24 @@ class MySQLDB(object):
     _default_pool_recycle: Final[int] = 28800
 
     def __init__(self, fname: str = '') -> None:
-        self.fname: str = fname
+        self.fname = fname
         self._pool: aiomysql.Pool = None
 
     async def __aenter__(self) -> "MySQLDB":
         await self._create_pool()
         return self
 
-    async def close(self) -> None:
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if self._pool is not None:
             self._pool.close()
             await self._pool.wait_closed()
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.close()
 
     async def _create_pool(self) -> None:
         """
         创建连接池
         """
 
-        db_config: dict = CONFIG['Database']
+        db_config = CONFIG.get('Database', {})
         self._pool: aiomysql.Pool = await aiomysql.create_pool(
             user=db_config['user'],
             password=db_config['password'],

@@ -3,8 +3,10 @@ import asyncio
 import re
 from typing import List, Optional
 
+from aiotieba.typing import Comment, Post
+
 import aiotieba_reviewer as tbr
-from aiotieba_reviewer import Comment, Ops, Post, Punish, TypeObj
+from aiotieba_reviewer import Ops, Punish, TypeObj
 
 
 @tbr.reviewer.post.set_checker()
@@ -18,7 +20,6 @@ async def check_post(post: Post) -> Optional[Punish]:
 
 
 async def _check_post(post: Post) -> Optional[Punish]:
-
     text = post.text
     if text.count('\n') > 134:
         return Punish(post, Ops.DELETE, note="闪光弹")
@@ -31,7 +32,6 @@ async def comments_producer(post: Post) -> List[Comment]:
 
 @tbr.reviewer.comment.set_checker()
 async def check_text(obj: TypeObj) -> Optional[Punish]:
-
     if obj.user.level >= 7:
         return
 
@@ -41,7 +41,6 @@ async def check_text(obj: TypeObj) -> Optional[Punish]:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--no_test",

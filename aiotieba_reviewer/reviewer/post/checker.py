@@ -14,7 +14,6 @@ def __id_checker(func):
     """
 
     async def _(post: Post) -> Optional[Punish]:
-
         prev_reply_num = client._db_sqlite.get_id(post.pid)
         if prev_reply_num is not None:
             if post.reply_num == prev_reply_num:
@@ -60,7 +59,7 @@ def set_checker(
     def _(new_checker: TypePostChecker) -> TypePostChecker:
         if new_checker is __default_checker:
             return new_checker
-        
+
         _set_checker_hook()
 
         global ori_checker, checker

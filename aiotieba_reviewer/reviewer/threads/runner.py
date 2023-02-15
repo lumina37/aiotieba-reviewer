@@ -23,7 +23,8 @@ async def __default_runner(fname: str, pn: int = 1) -> None:
         if punishes is None:
             continue
         for punish in punishes:
-            threads.remove(punish.obj)
+            if punish:
+                threads.remove(punish.obj)
         await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
 
     for thread in threads:

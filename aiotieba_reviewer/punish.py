@@ -1,7 +1,7 @@
 import sys
 
 from ._typing import TypeObj
-from .enum import Ops
+from .enums import Ops
 
 
 class Punish(object):

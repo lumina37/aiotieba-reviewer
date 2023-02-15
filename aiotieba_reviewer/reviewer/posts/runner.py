@@ -22,7 +22,8 @@ async def __default_runner(thread: Thread) -> Optional[Punish]:
         if punishes is None:
             continue
         for punish in punishes:
-            posts.remove(punish.obj)
+            if punish:
+                posts.remove(punish.obj)
         punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
         if punishes:
             punish = Punish(thread)

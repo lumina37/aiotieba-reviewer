@@ -1,13 +1,13 @@
 from typing import AsyncGenerator
 
-import aiotieba
+import aiotieba as tb
 
 from .database import MySQLDB, SQLiteDB
 
 _fname = ''
 _db_sqlite = None
 
-client_generator: AsyncGenerator[aiotieba.Client, None] = None
+client_generator: AsyncGenerator[tb.Client, None] = None
 db_generator: AsyncGenerator[MySQLDB, None] = None
 
 
@@ -20,7 +20,7 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
     """
 
     async def _client_generator():
-        async with aiotieba.Client(BDUSS_key) as client:
+        async with tb.Client(BDUSS_key, enable_ws=True) as client:
             while 1:
                 yield client
 
@@ -28,7 +28,7 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
     client_generator = _client_generator()
 
 
-async def get_client() -> aiotieba.Client:
+async def get_client() -> tb.Client:
     """
     获取一个客户端
 

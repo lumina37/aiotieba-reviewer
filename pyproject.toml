@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-dependencies = ["aiotieba[img,speedup]<4.0,>=3.1.0", "aiomysql<0.2,>=0.1.0"]
+dependencies = ["aiotieba[img,speedup]<4.0,>=3.2.1", "aiomysql<0.2,>=0.1.0"]
 dynamic = ["version"]
 
 [tool.setuptools.packages.find]
@@ -40,22 +40,9 @@ skip-string-normalization = true
 target-version = ["py38"]
 extend-exclude = ".*_pb2.py"
 
-[tool.isort]
-profile = "black"
-line_length = 120
-py_version = "38"
-extend_skip_glob = ["*_pb2.py"]
-
 [tool.ruff]
 line-length = 120
 select = ["W", "E", "F", "I"]
 ignore = ["E402", "E501"]
 target-version = "py38"
 extend-exclude = ["*_pb2.py"]
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-q"
-testpaths = ["tests"]
-required_plugins = "pytest-asyncio"
-asyncio_mode = "strict"

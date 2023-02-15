@@ -14,7 +14,6 @@ def __id_checker(func):
     """
 
     async def _(thread: Thread) -> Optional[Punish]:
-
         prev_last_time = client._db_sqlite.get_id(thread.tid)
         if prev_last_time is not None:
             if thread.last_time == prev_last_time:
