@@ -1,29 +1,20 @@
-.*/
-build/
-dist/
-log/
-*.egg-info
+*
 
-*.toml
-*.exe
-*.csv
-*.xlsx
-*.md
-*.cmd
-*.jpg
-*.txt
-
-/*.py
+!.gitattributes
+!.gitignore
+!LICENSE
+!mkdocs.yml
+!pyproject.toml
+!README.md
 
 !.github
 !.github/**
+!aiotieba_reviewer
+!aiotieba_reviewer/**
+!docs
 !docs/**
-!setup.py
+!examples
+!examples/**
 
-!README.md
-!ReadMe.md
-!pyproject.toml
-
-*.code-workspace
-*.pyc
+*.py[cd]
 __pycache__
