@@ -6,9 +6,9 @@ from collections.abc import Callable
 from typing import Dict, List, Optional, Tuple, Union
 
 import aiotieba as tb
-from aiotieba._config import tomllib
-from aiotieba.client.get_ats import At
-from aiotieba.client.get_threads import ShareThread
+from aiotieba.api.get_ats import At
+from aiotieba.api.get_threads import ShareThread
+from aiotieba.config import tomllib
 
 import aiotieba_reviewer as tbr
 

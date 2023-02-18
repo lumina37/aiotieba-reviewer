@@ -27,8 +27,7 @@ async def __default_runner(fname: str, pn: int = 1) -> None:
                 threads.remove(punish.obj)
         await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
 
-    for thread in threads:
-        await t_runner.runner(thread)
+    await asyncio.gather(*[t_runner.runner(t) for t in threads])
 
 
 def __runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
