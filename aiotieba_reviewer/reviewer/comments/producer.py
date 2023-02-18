@@ -1,7 +1,7 @@
 from typing import Awaitable, Callable, List
 
-from ..._typing import Comment, Post
 from ...client import get_client
+from ...typing import Comment, Post
 
 TypeCommentsProducer = Callable[[Post], Awaitable[List[Comment]]]
 

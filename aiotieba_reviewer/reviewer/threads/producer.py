@@ -1,7 +1,7 @@
 from typing import Awaitable, Callable, List
 
-from ..._typing import Thread
 from ...client import get_client
+from ...typing import Thread
 
 TypeThreadsProducer = Callable[[], Awaitable[List[Thread]]]
 

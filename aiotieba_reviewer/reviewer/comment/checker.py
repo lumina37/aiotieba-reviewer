@@ -1,8 +1,8 @@
 from typing import Awaitable, Callable, Optional
 
 from ... import client
-from ..._typing import Comment
 from ...punish import Punish
+from ...typing import Comment
 from ..user_checker import _user_checker
 
 TypeCommentChecker = Callable[[Comment], Awaitable[Optional[Punish]]]

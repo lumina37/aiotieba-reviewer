@@ -2,8 +2,8 @@ import asyncio
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Thread
 from ...punish import Punish
+from ...typing import Thread
 from ..post import runner as p_runner
 from . import filter, producer
 

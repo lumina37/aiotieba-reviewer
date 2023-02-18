@@ -45,7 +45,7 @@ async def run_with_dyn_interval(dyn_interval: Generator[float, None, None]) -> N
             await asyncio.sleep(time_interval)
 
 
-async def run_multi_pn(pn_gen: Generator[int, None, None] = range(64, 0, -1)) -> None:
+async def run_multi_pn(pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> None:
     """
     清洗多个页码 将禁用历史状态缓存以允许重复检查
 

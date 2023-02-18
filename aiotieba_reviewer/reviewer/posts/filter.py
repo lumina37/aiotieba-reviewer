@@ -1,7 +1,7 @@
 from typing import Awaitable, Callable, List, Optional
 
-from ..._typing import Post
 from ...punish import Punish
+from ...typing import Post
 
 TypePostsFilter = Callable[[List[Post]], Awaitable[Optional[List[Punish]]]]
 
