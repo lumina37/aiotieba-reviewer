@@ -17,6 +17,8 @@ async def __null_runner(_):
 async def __default_runner(thread: Thread) -> Optional[Punish]:
     posts = await producer.producer(thread)
 
+    rethrow_punish = None
+
     for filt in filter._filters:
         punishes = await filt(posts)
         if punishes is None:
@@ -24,22 +26,20 @@ async def __default_runner(thread: Thread) -> Optional[Punish]:
         for punish in punishes:
             if punish:
                 posts.remove(punish.obj)
-        punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
-        if punishes:
-            punish = Punish(thread)
-            for _punish in punishes:
-                if _punish is not None:
-                    punish |= _punish
-            return punish
+                _p = await executor.punish_executor(punish)
+                if _p is not None:
+                    if rethrow_punish is None:
+                        rethrow_punish = Punish(thread)
+                    rethrow_punish |= _p
 
     punishes = await asyncio.gather(*[p_runner.runner(p) for p in posts])
-    punishes = [p for p in punishes if p is not None]
-    if punishes:
-        punish = Punish(thread)
-        for _punish in punishes:
-            if _punish is not None:
-                punish |= _punish
-        return punish
+    for _p in punishes:
+        if _p is not None:
+            if rethrow_punish is None:
+                rethrow_punish = Punish(thread)
+            rethrow_punish |= _p
+
+    return rethrow_punish
 
 
 runner: TypePostsRunner = __null_runner
