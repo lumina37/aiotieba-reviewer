@@ -56,7 +56,7 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> 
         await threads.runner.runner(client._fname, pn)
 
 
-async def test(tid: int, pid: int, is_floor: bool = False) -> Optional[Punish]:
+async def test(tid: int, pid: int = 0, is_floor: bool = False) -> Optional[Punish]:
     client = await get_client()
     if not pid:
         posts = await client.get_posts(tid, rn=0)
