@@ -11,10 +11,12 @@
 + 使用本地缓存避免重复检测，极大提升性能
 + 优先使用websocket接口，节省带宽
 
-## 安装
+## 安装 (beta)
 
 ```shell
-pip install aiotieba-reviewer
+git clone https://github.com/Starry-OvO/aiotieba-reviewer.git
+cd ./aiotieba-reviewer
+pip install .
 ```
 
 ## 教程
