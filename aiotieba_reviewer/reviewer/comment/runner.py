@@ -1,8 +1,8 @@
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Comment
 from ...punish import Punish
+from ...typing import Comment
 from . import checker
 
 TypeCommentRunner = Callable[[Comment], Awaitable[Optional[Punish]]]

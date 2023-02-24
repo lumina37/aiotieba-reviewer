@@ -1,8 +1,8 @@
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Post
 from ...punish import Punish
+from ...typing import Post
 from .. import comments
 from . import checker
 

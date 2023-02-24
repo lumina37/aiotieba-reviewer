@@ -1,7 +1,7 @@
 from typing import Awaitable, Callable, List
 
-from ..._typing import Post, Thread
 from ...client import get_client
+from ...typing import Post, Thread
 
 TypePostsProducer = Callable[[Thread], Awaitable[List[Post]]]
 

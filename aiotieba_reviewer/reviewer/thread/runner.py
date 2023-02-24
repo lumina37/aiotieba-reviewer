@@ -3,8 +3,8 @@ from typing import Awaitable, Callable
 from aiotieba import LOG
 
 from ... import executor
-from ..._typing import Thread
 from ...perf_stat import aperf_stat
+from ...typing import Thread
 from .. import posts
 from . import checker
 

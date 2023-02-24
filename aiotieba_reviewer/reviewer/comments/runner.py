@@ -2,8 +2,8 @@ import asyncio
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
-from ..._typing import Post
 from ...punish import Punish
+from ...typing import Post
 from ..comment import runner as c_runner
 from . import filter, producer
 
@@ -17,6 +17,8 @@ async def __null_runner(_):
 async def __default_runner(post: Post) -> Optional[Punish]:
     comments = await producer.producer(post)
 
+    rethrow_punish = None
+
     for filt in filter._filters:
         punishes = await filt(comments)
         if punishes is None:
@@ -24,21 +26,20 @@ async def __default_runner(post: Post) -> Optional[Punish]:
         for punish in punishes:
             if punish:
                 comments.remove(punish.obj)
-        punishes = await asyncio.gather(*[executor.punish_executor(p) for p in punishes])
-        if punishes:
-            punish = Punish(post)
-            for _punish in punishes:
-                if _punish is not None:
-                    punish |= _punish
-            return punish
+                _p = await executor.punish_executor(punish)
+                if _p is not None:
+                    if rethrow_punish is None:
+                        rethrow_punish = Punish(post)
+                    rethrow_punish |= _p
 
     punishes = await asyncio.gather(*[c_runner.runner(c) for c in comments])
-    if punishes:
-        punish = Punish(post)
-        for _punish in punishes:
-            if _punish is not None:
-                punish |= _punish
-        return punish
+    for _p in punishes:
+        if _p is not None:
+            if rethrow_punish is None:
+                rethrow_punish = Punish(post)
+            rethrow_punish |= _p
+
+    return rethrow_punish
 
 
 runner: TypeCommentsRunner = __null_runner
