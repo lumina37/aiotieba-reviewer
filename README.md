@@ -11,10 +11,12 @@
 + 使用本地缓存避免重复检测，极大提升性能
 + 优先使用websocket接口，节省带宽
 
-## 安装
+## 安装 (beta)
 
 ```shell
-pip install aiotieba-reviewer
+git clone https://github.com/Starry-OvO/aiotieba-reviewer.git
+cd ./aiotieba-reviewer
+pip install .
 ```
 
 ## 教程
@@ -45,5 +47,4 @@ pip install aiotieba-reviewer
 
 + [TiebaManager（吧务管理器 有用户界面）](https://github.com/dog194/TiebaManager)
 + [TiebaLite（第三方安卓客户端）](https://github.com/HuanCheng65/TiebaLite/tree/4.0-dev)
-+ [基于aiotieba的高弹性吧务审查框架](https://github.com/Starry-OvO/aiotieba-reviewer)
 + [贴吧protobuf定义文件合集](https://github.com/n0099/tbclient.protobuf)
