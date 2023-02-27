@@ -271,7 +271,7 @@ class Listener(object):
                 await asyncio.sleep(4.0)
 
             except asyncio.CancelledError:
-                pass
+                return
             except Exception:
                 tb.LOG().critical("Unhandled error", exc_info=True)
                 return
