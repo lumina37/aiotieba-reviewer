@@ -145,6 +145,7 @@ class Context(object):
                 self.parent = posts.thread
 
             else:
+                await asyncio.sleep(1.5)
                 posts = await self.admin.get_posts(self.tid, pn=9999, rn=10, sort=tb.enums.PostSortType.DESC)
                 if not posts:
                     return False
@@ -234,7 +235,7 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0):
                 await func(self, ctx)
 
             except Exception as err:
-                tb.LOG().error(err)
+                tb.LOG().error(str(err))
 
         return _
 
@@ -628,8 +629,8 @@ class Listener(object):
     @check_and_log(need_permission=4, need_arg_num=0)
     async def cmd_avada_kedavra(self, ctx: Context) -> None:
         """
-        avada_kedavra指令
-        在exdrop基础上追加清空发帖人主页显示的在当前吧的所有主题帖
+        索命咒
+        删帖 清空发帖人主页显示的在当前吧的所有主题帖 加入脚本黑名单+封禁十天
         """
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
