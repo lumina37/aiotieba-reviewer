@@ -235,7 +235,7 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0):
                 await func(self, ctx)
 
             except Exception as err:
-                tb.LOG().error(str(err))
+                tb.LOG().error(err)
 
         return _
 
@@ -282,7 +282,7 @@ class Listener(object):
         if tup is None:
             cfg = FORUMS.get(fname)
             if cfg is None:
-                raise KeyError(f"找不到管理员. fname={fname}")
+                raise ValueError(f"找不到管理员. fname={fname}")
 
             admin = tb.Client(cfg['admin'])
             await admin.__aenter__()
