@@ -625,6 +625,29 @@ class Listener(object):
 
         await self.__cmd_set(ctx, -5, note, user_id=ctx.parent.author_id)
 
+    @check_and_log(need_permission=4, need_arg_num=0)
+    async def cmd_avada_kedavra(self, ctx: Context) -> None:
+        """
+        avada_kedavra指令
+        在exdrop基础上追加清空发帖人主页显示的在当前吧的所有主题帖
+        """
+
+        note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
+        user_id = ctx.parent.author_id
+        await self.__cmd_set(ctx, -5, note, user_id=user_id)
+        await self.__cmd_drop(ctx, 10)
+
+        pids = []
+        for pn in range(1, 0xFFFF):
+            threads = await ctx.admin.get_user_threads(user_id, pn)
+            pids += [thread.pid for thread in threads if thread.fname == ctx.fname]
+            if len(threads) < 60:
+                break
+
+        step = 30
+        for i in range(0, len(pids) % 30, 30):
+            await ctx.admin.del_posts(ctx.fname, pids[i : i + step])
+
     @check_and_log(need_permission=4, need_arg_num=2)
     async def cmd_set(self, ctx: Context) -> None:
         """

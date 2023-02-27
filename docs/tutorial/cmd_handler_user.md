@@ -24,7 +24,7 @@
 
 再输入
 
-**指令类型**: [`drop`](#drop-drop3-drop1)<br>
+**指令类型**: [`drop`](#drop--drop3--drop1-删封)<br>
 **参数1**: `test1234` (可选的封禁理由)
 
 并发布回复
@@ -55,7 +55,7 @@
 先`@v_guard`并确保@变蓝<br>
 再输入
 
-**指令类型**: [`block`](#block-block3-block1)<br>
+**指令类型**: [`block`](#block--block3--block1-封禁)<br>
 **参数1**: `刚刚复制的那坨东西` (用户id: 包含[tieba_uid](https://aiotieba.cc/tutorial/start#tieba_uid)的字符串)
 
 点击回复
@@ -76,7 +76,7 @@
 先`@v_guard`并确保@变蓝<br>
 再输入
 
-**指令类型**: [`drop3`](#drop-drop3-drop1)
+**指令类型**: [`drop3`](#drop--drop3--drop1-删封)
 
 点击回复
 
@@ -104,7 +104,7 @@
 先`@v_guard`并确保@变蓝<br>
 再输入
 
-**指令类型**: [`unblock`](#unblock)<br>
+**指令类型**: [`unblock`](#unblock-解封)<br>
 **参数1**: `刚刚复制的那坨东西` (用户id: portrait)
 
 点击回复
@@ -124,7 +124,7 @@
 @v_guard <指令类型> [参数1] [参数2] ...
 ```
 
-例如在封禁指令[`block`](#block-block3-block1)
+例如在封禁指令[`block`](#block--block3--block1-封禁)
 
 ```text
 @v_guard block 李彦宏 封禁测试
@@ -138,7 +138,7 @@
 
 ## 权限级别说明
 
-权限级别可以通过指令[`set`](#set) [`white`](#white) [`black`](#black) [`reset`](#reset)修改
+权限级别可以通过指令[`set`](#set-设置权限) [`white`](#white-白名单) [`black`](#black-黑名单) [`reset`](#reset-重置权限)修改
 
 任何修改权限的操作都包含了越界检查，即低权限无法修改高权限，也无法将其他用户修改为高权限
 
@@ -148,7 +148,7 @@
 + `4` 大吧主 - 可以添加脚本黑名单 贴吧黑名单<br>
 + `3` 高权限吧务 - 可以置顶 撤置顶 解贴吧黑名单 解脚本黑名单<br>
 + `2` 普通吧务 - 可以删 封 解封 加精 撤精 屏蔽 解屏蔽 拒绝申诉<br>
-+ `1` 非吧务的优秀创作者 - 可以使用[`recom_status`](#recom_status) [`recommend`](#recommend) [`ping`](#ping)指令<br>
++ `1` 非吧务的优秀创作者 - 可以使用[`recom_status`](#recom_status-推荐配额) [`recommend`](#recommend-首页推荐) [`ping`](#ping-可用性测试)指令<br>
 + `0` 普通吧友(默认值) 一般不需要特别指定<br>
 + `-1` 不允许使用指令的用户<br>
 + `-2~-4` 可自定义的惩罚标记<br>
@@ -381,7 +381,7 @@ drop1: 对应1天封禁<br>
 
 ***开发者说***
 
-[`block`](#block-block3-block1)和[`delete`](#delete)的组合，用于提升删封操作效率
+[`block`](#block--block3--block1-封禁)和[`delete`](#delete-删帖)的组合，用于提升删封操作效率
 
 ---
 
@@ -648,7 +648,33 @@ drop1: 对应1天封禁<br>
 
 ***开发者说***
 
-指令[`block`](#block-block3-block1) [`delete`](#delete) [`black`](#black)的组合，用于提升删封循操作效率
+指令[`block`](#block--block3--block1-封禁) [`delete`](#delete-删帖) [`black`](#black-黑名单)的组合，用于提升删封循操作效率
+
+---
+
+### avada_kedavra 抹除
+
+```text
+@v_guard avada_kedavra [note]
+```
+
+***功能***
+
+在[`exdrop`](#exdrop-删封循)的基础上追加*清空*发帖人主页显示的在当前吧的所有主题帖<br>
+在使用该指令时请**特别注意指令的发送位置**，以免产生意料之外的效果<br>
+修改权限时，操作者的权限级别必须大于被操作者的权限级别。由于该指令风险较高，若操作者权限不足则所有请求都将被驳回
+
+***参数说明***
+
+`note`: 可选参数，操作理由，方便日后查阅
+
+***能使用该指令的最低权限级别***
+
+4 大吧主
+
+***开发者说***
+
+<font color="red">**Avada Kedavra！**</font>
 
 ---
 
@@ -861,7 +887,7 @@ Used: 15 / 100 = 15.00%
 
 ***功能***
 
-将指令所在主题帖标记为无关水，并立即*临时屏蔽*。需要与[`water_restrict`](#water_restrict-设置限水状态) [`unwater`](#unwater)指令配合<br>
+将指令所在主题帖标记为无关水，并立即*临时屏蔽*。需要与[`water_restrict`](#water_restrict-设置限水状态) [`unwater`](#unwater-清除无关水标记)指令配合<br>
 被标记为无关水的主题帖，会在云审查工具进入无关水管制状态后被自动*临时屏蔽*<br>
 在特定事件（如：赛事、直播、Breaking News）发生时，吧务可用该指令临时管制版面上的无关水帖
 
@@ -883,8 +909,8 @@ Used: 15 / 100 = 15.00%
 
 ***功能***
 
-清除指令所在主题帖的无关水标记，并立刻解除*临时屏蔽*。需要与[`water_restrict`](#water_restrict-设置限水状态) [`water`](#water)指令配合<br>
-该指令用于回滚[`water`](#water)指令已产生的任何效果
+清除指令所在主题帖的无关水标记，并立刻解除*临时屏蔽*。需要与[`water_restrict`](#water_restrict-设置限水状态) [`water`](#water-标记无关水)指令配合<br>
+该指令用于回滚[`water`](#water-标记无关水)指令已产生的任何效果
 
 ***能使用该指令的最低权限级别***
 
@@ -901,7 +927,7 @@ Used: 15 / 100 = 15.00%
 ***功能***
 
 需要配合云审查工具才能产生效果<br>
-命令云审查工具进入或退出无关水管制模式。需要与[`water`](#water) [`unwater`](#unwater)指令配合
+命令云审查工具进入或退出无关水管制模式。需要与[`water`](#water-标记无关水) [`unwater`](#unwater-清除无关水标记)指令配合
 
 ***参数说明***
 
