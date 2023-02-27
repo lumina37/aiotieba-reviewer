@@ -113,6 +113,7 @@ class Context(object):
     async def _init(self) -> bool:
         self.permission = await self.admin_db.get_user_id(self.user.user_id)
 
+        self.text = self.at.text
         if len(self.at.text.encode('utf-8')) >= 78:
             await self.init_full()
 
@@ -133,37 +134,34 @@ class Context(object):
                 if comment.pid == self.pid:
                     self.text = comment.text
 
-        else:
-            if self.at.is_thread:
-                await asyncio.sleep(3.0)
-                posts = await self.admin.get_posts(self.tid, rn=0)
-                if not posts:
-                    return False
-                self.text = posts.thread.text
-                share_thread = posts.thread.share_origin
-                posts = await self.admin.get_posts(share_thread.tid, rn=0)
-                self.parent = posts.thread
+        elif self.at.is_thread:
+            await asyncio.sleep(3.0)
+            posts = await self.admin.get_posts(self.tid, rn=0)
+            if not posts:
+                return False
+            self.text = posts.thread.text
+            share_thread = posts.thread.share_origin
+            posts = await self.admin.get_posts(share_thread.tid, rn=0)
+            self.parent = posts.thread
 
-            else:
-                await asyncio.sleep(1.5)
-                posts = await self.admin.get_posts(self.tid, pn=9999, rn=10, sort=tb.enums.PostSortType.DESC)
-                if not posts:
-                    return False
-                for post in posts:
-                    if post.pid == self.pid:
-                        self.text = post.text
-                        break
-                posts = await self.admin.get_posts(self.tid, rn=0)
-                if not posts:
-                    return False
-                self.parent = posts.thread
+        else:
+            await asyncio.sleep(2.0)
+            posts = await self.admin.get_posts(self.tid, pn=9999, rn=10, sort=tb.enums.PostSortType.DESC)
+            if not posts:
+                return False
+            for post in posts:
+                if post.pid == self.pid:
+                    self.text = post.text
+                    break
+            posts = await self.admin.get_posts(self.tid, rn=0)
+            if not posts:
+                return False
+            self.parent = posts.thread
 
         self._init_full_success = True
         return True
 
-    def __init_args(
-        self,
-    ) -> None:
+    def __init_args(self) -> None:
         self._args = []
         self._cmd_type = ''
 
@@ -633,10 +631,11 @@ class Listener(object):
         删帖 清空发帖人主页显示的在当前吧的所有主题帖 加入脚本黑名单+封禁十天
         """
 
+        await self.__cmd_drop(ctx, 10)
+
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
         user_id = ctx.parent.author_id
         await self.__cmd_set(ctx, -5, note, user_id=user_id)
-        await self.__cmd_drop(ctx, 10)
 
         pids = []
         for pn in range(1, 0xFFFF):
