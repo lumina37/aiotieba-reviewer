@@ -113,7 +113,6 @@ class Context(object):
     async def _init(self) -> bool:
         self.permission = await self.admin_db.get_user_id(self.user.user_id)
 
-        self.text = self.at.text
         if len(self.at.text.encode('utf-8')) >= 78:
             await self.init_full()
 
@@ -125,7 +124,7 @@ class Context(object):
             return True
 
         if self.at.is_floor:
-            await asyncio.sleep(1.5)
+            await asyncio.sleep(3.0)
             comments = await self.admin.get_comments(self.tid, self.pid, is_floor=True)
             if not comments:
                 return False
@@ -146,16 +145,12 @@ class Context(object):
 
         else:
             await asyncio.sleep(2.0)
-            posts = await self.admin.get_posts(self.tid, pn=9999, rn=10, sort=tb.enums.PostSortType.DESC)
-            if not posts:
-                return False
+            posts = await self.admin.get_posts(self.tid, pn=8192, rn=20, sort=tb.enums.PostSortType.DESC)
             for post in posts:
                 if post.pid == self.pid:
                     self.text = post.text
                     break
             posts = await self.admin.get_posts(self.tid, rn=0)
-            if not posts:
-                return False
             self.parent = posts.thread
 
         self._init_full_success = True
@@ -250,7 +245,7 @@ class Listener(object):
     def __init__(self) -> None:
         self.listener = tb.Client(LISTEN_CONFIG['listener'])
         self.admins = {}
-        self.time_recorder = TimerRecorder(86400, 10)
+        self.time_recorder = TimerRecorder(3600 * 12, 10)
 
     async def __aenter__(self) -> "Listener":
         await self.listener.__aenter__()
