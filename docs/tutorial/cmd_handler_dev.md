@@ -5,17 +5,17 @@
 在当前工作目录下新建配置文件`cmd_handler.toml`，并参考下列案例填写你自己的配置
 
 ```toml
-listener_key = "listener"  # 在这里填用于监听at信息的账号的BDUSS_key
+listener = "listener"  # 在这里填用于监听at信息的账号的BDUSS_key
 
-[[Configs]]
+[[Forum]]
 fname = "lol半价"  # 在这里填贴吧名
-admin_key = "default"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
-speaker_key = "default"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
+admin = "default"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
+speaker = "default"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
 
-[[Configs]]
-fname = "asoul"  # 在这里填另一个贴吧名
-admin_key = "default"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
-speaker_key = "default"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
+[[Forum]]
+fname = "抗压背锅"  # 在这里填另一个贴吧名
+admin = "default"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
+speaker = "default"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
 ```
 
 ## 运行脚本

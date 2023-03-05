@@ -92,7 +92,7 @@ class MySQLDB(object):
             autocommit=True,
             host=db_config.get('host', 'localhost'),
             port=db_config.get('port', self._default_port),
-            unix_socket=db_config.get('unix_socket', None),
+            unix_socket=db_config.get('unix_socket'),
         )
 
     async def create_database(self) -> bool:
@@ -111,7 +111,7 @@ class MySQLDB(object):
                 port=db_config.get('port', self._default_port),
                 user=db_config['user'],
                 password=db_config['password'],
-                unix_socket=db_config.get('unix_socket', None),
+                unix_socket=db_config.get('unix_socket'),
                 autocommit=True,
                 loop=asyncio.get_running_loop(),
             )
