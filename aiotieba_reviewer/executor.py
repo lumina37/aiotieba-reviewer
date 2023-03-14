@@ -59,8 +59,9 @@ class DeleteList(object):
 
     async def _delete_all(self) -> None:
         client = await get_client()
-        await client.del_posts(get_fname(), self._pids[:30])
+        pids = self._pids[:30]
         self._pids = self._pids[30:]
+        await client.del_posts(get_fname(), pids)
 
     async def _delete_all_after_sleep(self) -> None:
         try:
