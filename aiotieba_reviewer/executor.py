@@ -49,7 +49,7 @@ class DeleteList(object):
 
         self._pids.append(pid)
 
-        if len(self._pids) == self._maxlen:
+        if len(self._pids) >= self._maxlen:
             if not self._delete_task.done():
                 self._delete_task.cancel()
             await self._delete_all()
@@ -59,8 +59,8 @@ class DeleteList(object):
 
     async def _delete_all(self) -> None:
         client = await get_client()
-        await client.del_posts(get_fname(), self._pids)
-        self._pids.clear()
+        await client.del_posts(get_fname(), self._pids[:30])
+        self._pids = self._pids[30:]
 
     async def _delete_all_after_sleep(self) -> None:
         try:
