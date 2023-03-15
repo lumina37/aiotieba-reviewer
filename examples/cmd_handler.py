@@ -126,8 +126,6 @@ class Context(object):
         if self.at.is_floor:
             await asyncio.sleep(3.0)
             comments = await self.admin.get_comments(self.tid, self.pid, is_floor=True)
-            if not comments:
-                return False
             self.parent = comments.post
             for comment in comments:
                 if comment.pid == self.pid:
@@ -136,8 +134,6 @@ class Context(object):
         elif self.at.is_thread:
             await asyncio.sleep(3.0)
             posts = await self.admin.get_posts(self.tid, rn=0)
-            if not posts:
-                return False
             self.text = posts.thread.text
             share_thread = posts.thread.share_origin
             posts = await self.admin.get_posts(share_thread.tid, rn=0)
@@ -160,7 +156,7 @@ class Context(object):
         self._args = []
         self._cmd_type = ''
 
-        text = re.sub(r'@.*? ', '', self.text)
+        text = re.sub(r'.*?@.*? ', '', self.text, count=1)
 
         self._args = [arg.lstrip(' ') for arg in text.split(' ')]
         if self._args:
