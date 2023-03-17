@@ -621,7 +621,7 @@ class MySQLDB(object):
         将img_hash添加到表imghash_{fname}
 
         Args:
-            img_hash (int): 图像的phash
+            img_hash (int): 图像的ahash
             raw_hash (str): 贴吧图床hash
             permission (int, optional): 封锁级别. Defaults to 0.
             note (str, optional): 备注. Defaults to ''.
@@ -650,7 +650,7 @@ class MySQLDB(object):
         从表imghash_{fname}中删除img_hash
 
         Args:
-            img_hash (int): 图像的phash
+            img_hash (int): 图像的ahash
 
         Returns:
             bool: True成功 False失败
@@ -674,8 +674,8 @@ class MySQLDB(object):
         获取表imghash_{fname}中img_hash的封锁级别
 
         Args:
-            img_hash (int): 图像的phash
-            hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+            img_hash (int): 图像的ahash
+            hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像ahash完全一致
 
         Returns:
             int: 封锁级别
@@ -707,8 +707,8 @@ class MySQLDB(object):
         获取表imghash_{fname}中img_hash的完整信息
 
         Args:
-            img_hash (int): 图像的phash
-            hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+            img_hash (int): 图像的ahash
+            hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像ahash完全一致
 
         Returns:
             tuple[int, str]: 封锁级别, 备注

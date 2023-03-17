@@ -93,7 +93,7 @@ async def get_imghash(image: "np.ndarray", *, hamming_dist: int = 0) -> int:
 
     Args:
         image (np.ndarray): 图像
-        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像ahash完全一致
 
     Returns:
         int: 封锁级别
@@ -111,7 +111,7 @@ async def get_imghash_full(image: "np.ndarray", *, hamming_dist: int = 0) -> Tup
 
     Args:
         image (np.ndarray): 图像
-        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像phash完全一致
+        hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像ahash完全一致
 
     Returns:
         tuple[int, str]: 封锁级别, 备注
