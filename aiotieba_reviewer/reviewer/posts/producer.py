@@ -30,7 +30,7 @@ async def __default_producer(thread: Thread) -> List[Post]:
             else:
                 first_posts = await client.get_posts(thread.tid, rn=need_rn, with_comments=True, comment_rn=10)
                 post_set.update(first_posts._objs)
-                hot_posts = await client.get_posts(thread.tid, sort=2, with_comments=True, comment_rn=10)
+                hot_posts = await client.get_posts(thread.tid, sort=PostSortType.HOT, with_comments=True, comment_rn=10)
                 post_set.update(hot_posts._objs)
             post_list = list(post_set)
         else:
