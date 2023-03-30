@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 from typing import Awaitable, Callable, Optional
 
 from ... import executor
@@ -32,12 +33,16 @@ async def __default_runner(thread: Thread) -> Optional[Punish]:
                         rethrow_punish = Punish(thread)
                     rethrow_punish |= _p
 
-    punishes = await asyncio.gather(*[p_runner.runner(p) for p in posts])
-    for _p in punishes:
-        if _p is not None:
-            if rethrow_punish is None:
-                rethrow_punish = Punish(thread)
-            rethrow_punish |= _p
+    for i in itertools.count():
+        _posts = posts[i * 50 : (i + 1) * 50]
+        if not _posts:
+            break
+        punishes = await asyncio.gather(*[p_runner.runner(p) for p in _posts])
+        for _p in punishes:
+            if _p is not None:
+                if rethrow_punish is None:
+                    rethrow_punish = Punish(thread)
+                rethrow_punish |= _p
 
     return rethrow_punish
 
