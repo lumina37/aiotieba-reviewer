@@ -14,5 +14,5 @@ from .database import MySQLDB, SQLiteDB
 from .enums import Ops
 from .perf_stat import aperf_stat
 from .punish import Punish
-from .reviewer import no_test, run, run_multi_pn, run_with_dyn_interval, test
+from .reviewer import no_test, run, run_multi_pn, run_multi_pn_with_time_threshold, run_with_dyn_interval, test
 from .typing import TypeObj
