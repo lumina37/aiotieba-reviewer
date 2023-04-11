@@ -766,48 +766,6 @@ class Listener(object):
         if await ctx.admin.blacklist_del(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_water(self, ctx: Context) -> None:
-        """
-        water指令
-        将指令所在主题帖标记为无关水，并临时屏蔽
-        """
-
-        if await ctx.admin_db.add_tid(ctx.tid, tag=1) and await ctx.admin.hide_thread(ctx.fname, ctx.tid):
-            await ctx.admin.del_post(ctx.fname, ctx.pid)
-
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_unwater(self, ctx: Context) -> None:
-        """
-        unwater指令
-        清除指令所在主题帖的无关水标记，并立刻解除屏蔽
-        """
-
-        if await ctx.admin_db.del_tid(ctx.tid) and await ctx.admin.unhide_thread(ctx.fname, ctx.tid):
-            await ctx.admin.del_post(ctx.fname, ctx.pid)
-
-    @check_and_log(need_permission=3, need_arg_num=1)
-    async def cmd_water_restrict(self, ctx: Context) -> None:
-        """
-        water_restrict指令
-        控制当前吧的云审查脚本的无关水管控状态
-        """
-
-        if ctx.args[0] == "enter":
-            if await ctx.admin_db.add_tid(0, tag=1):
-                await ctx.admin.del_post(ctx.fname, ctx.pid)
-        elif ctx.args[0] == "exit":
-            if await ctx.admin_db.add_tid(0, tag=0):
-                await ctx.admin.del_post(ctx.fname, ctx.pid)
-            limit = 128
-            tids = await ctx.admin_db.get_tid_list(1, limit=limit)
-            while 1:
-                for tid in tids:
-                    if await ctx.admin.unhide_thread(ctx.fname, tid):
-                        await ctx.admin_db.add_tid(tid, tag=1)
-                if len(tids) != limit:
-                    break
-
     @check_and_log(need_permission=1, need_arg_num=0)
     async def cmd_ping(self, ctx: Context) -> None:
         """
