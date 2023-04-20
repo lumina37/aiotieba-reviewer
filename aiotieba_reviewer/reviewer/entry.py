@@ -107,19 +107,19 @@ async def run_multi_pn_with_time_threshold(time_threshold: int, pn_gen: Generato
         await threads.runner.runner(client._fname, pn)
 
 
-async def test(tid: int, pid: int = 0, is_floor: bool = False) -> Optional[Punish]:
+async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Punish]:
     client = await get_client()
     if not pid:
         posts = await client.get_posts(tid, rn=0)
         thread.checker.set_checker(True, False)(thread.checker.ori_checker)
         return await thread.checker.checker(posts.thread)
     else:
-        if not is_floor:
-            comments = await client.get_comments(tid, pid, is_floor=False)
+        if not is_comment:
+            comments = await client.get_comments(tid, pid, is_comment=False)
             post.checker.set_checker(True, False)(post.checker.ori_checker)
             return await post.checker.checker(comments.post)
         else:
-            comments = await client.get_comments(tid, pid, is_floor=True)
+            comments = await client.get_comments(tid, pid, is_comment=True)
             for _comment in comments:
                 if _comment.pid == pid:
                     comment.checker.set_checker(True, False)(comment.checker.ori_checker)

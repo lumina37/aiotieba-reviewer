@@ -123,9 +123,9 @@ class Context(object):
         if self._init_full_success:
             return True
 
-        if self.at.is_floor:
+        if self.at.is_comment:
             await asyncio.sleep(3.0)
-            comments = await self.admin.get_comments(self.tid, self.pid, is_floor=True)
+            comments = await self.admin.get_comments(self.tid, self.pid, is_comment=True)
             self.parent = comments.post
             for comment in comments:
                 if comment.pid == self.pid:
