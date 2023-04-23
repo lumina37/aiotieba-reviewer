@@ -645,12 +645,13 @@ class MySQLDB(object):
             raise
 
     @exec_handler_MySQL(_create_table_imghash, False)
-    async def del_imghash(self, img_hash: int) -> bool:
+    async def del_imghash(self, img_hash: int, *, hamming_dist: int = 0) -> bool:
         """
         从表imghash_{fname}中删除img_hash
 
         Args:
             img_hash (int): 图像的ahash
+            hamming_dist (int): 匹配的最大海明距离 默认为0 即要求图像ahash完全一致
 
         Returns:
             bool: True成功 False失败
@@ -659,7 +660,12 @@ class MySQLDB(object):
         try:
             async with self._pool.acquire() as conn:
                 async with conn.cursor() as cursor:
-                    await cursor.execute(f"DELETE FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
+                    if hamming_dist > 0:
+                        await cursor.execute(
+                            f"DELETE FROM `imghash_{self.fname}` WHERE BIT_COUNT(`img_hash`^{img_hash})<={hamming_dist}"
+                        )
+                    else:
+                        await cursor.execute(f"DELETE FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
 
                     LOG().info(f"Succeeded. forum={self.fname} img_hash={img_hash}")
                     return True
