@@ -144,12 +144,14 @@ class Context(object):
             posts = await self.admin.get_posts(self.tid, pn=8192, rn=20, sort=tb.enums.PostSortType.DESC)
             for post in posts:
                 if post.pid == self.pid:
-                    self.text = post.text
+                    self.text = post.contents.text
                     break
             posts = await self.admin.get_posts(self.tid, rn=0)
             self.parent = posts.thread
 
+        self.__init_args()
         self._init_full_success = True
+
         return True
 
     def __init_args(self) -> None:
@@ -363,6 +365,8 @@ class Listener(object):
         recover指令
         恢复删帖
         """
+
+        await ctx.init_full()
 
         _id = ctx.args[0]
         _id = _id[_id.rfind('#') + 1 :]
