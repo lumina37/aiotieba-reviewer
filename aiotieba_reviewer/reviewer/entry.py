@@ -58,7 +58,9 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> 
         await threads.runner.runner(client._fname, pn)
 
 
-async def run_multi_pn_with_time_threshold(time_threshold: int, pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> None:
+async def run_multi_pn_with_time_threshold(
+    time_threshold: int, pn_gen: Generator[int, None, None] = range(4, 0, -1)
+) -> None:
     """
     清洗多个页码中的较新内容 将禁用历史状态缓存以允许重复检查
 
@@ -128,12 +130,15 @@ async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Pun
 
 
 @contextlib.contextmanager
-def no_test() -> None:
+def no_test(use_group=False) -> None:
     """
     取消测试模式以实际执行删封
+
+    Args:
+        use_group (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
     """
 
-    executor.punish_executor = executor.default_punish_executor
+    executor.punish_executor = executor.group_punish_executor if use_group else executor.default_punish_executor
     thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
     yield
