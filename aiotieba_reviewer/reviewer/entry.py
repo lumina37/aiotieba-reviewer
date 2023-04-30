@@ -130,15 +130,15 @@ async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Pun
 
 
 @contextlib.contextmanager
-def no_test(use_group=False) -> None:
+def no_test(use_del_list=False) -> None:
     """
     取消测试模式以实际执行删封
 
     Args:
-        use_group (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
+        use_del_list (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
     """
 
-    executor.punish_executor = executor.group_punish_executor if use_group else executor.default_punish_executor
+    executor.punish_executor = executor.group_punish_executor if use_del_list else executor.default_punish_executor
     thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
     yield
