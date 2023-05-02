@@ -31,20 +31,6 @@ def __id_checker(func):
     return _
 
 
-def __set_thread_user_level(func):
-    """
-    装饰器: 填补发帖用户等级
-    """
-
-    async def _(thread: Thread) -> Optional[Punish]:
-        _client = await client.get_client()
-        posts = await _client.get_posts(thread.tid, rn=0)
-        thread._user = posts.thread.user
-        return await func(thread)
-
-    return _
-
-
 async def __default_checker(_):
     pass
 
@@ -80,7 +66,6 @@ def set_checker(
         ori_checker = new_checker
         checker = ori_checker
 
-        checker = __set_thread_user_level(checker)
         if enable_user_checker:
             checker = _user_checker(checker)
         if enable_id_checker:
