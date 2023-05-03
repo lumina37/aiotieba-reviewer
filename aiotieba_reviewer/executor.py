@@ -89,7 +89,7 @@ def set_delete_list(_delete_list: TypeDeleteList) -> None:
 TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
 
 
-async def default_punish_executor(punish: Punish) -> Optional[Punish]:
+async def group_punish_executor(punish: Punish) -> Optional[Punish]:
     if day := punish.day:
         client = await get_client()
         await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
@@ -102,6 +102,44 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
             f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
         )
         await delete_list.append(punish.obj.pid)
+        return
+    if op == Ops.DEBUG:
+        LOG().info(
+            f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+        )
+        return
+    if op == Ops.HIDE:
+        LOG().info(
+            f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+        )
+        client = await get_client()
+        await client.hide_thread(get_fname(), punish.obj.tid)
+        return
+    if op & Ops.PARENT == Ops.PARENT:
+        op &= ~Ops.PARENT
+        punish.op = op
+        return punish
+    if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
+        op &= ~Ops.GRANDPARENT
+        op &= Ops.PARENT
+        punish.op = op
+        return punish
+
+
+async def default_punish_executor(punish: Punish) -> Optional[Punish]:
+    if day := punish.day:
+        client = await get_client()
+        await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
+
+    op = punish.op
+    if op == Ops.NORMAL:
+        return
+    if op == Ops.DELETE:
+        LOG().info(
+            f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+        )
+        client = await get_client()
+        await client.del_post(punish.obj.fid, punish.obj.pid)
         return
     if op == Ops.DEBUG:
         LOG().info(

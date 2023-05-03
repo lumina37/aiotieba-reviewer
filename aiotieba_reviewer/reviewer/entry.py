@@ -58,7 +58,9 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> 
         await threads.runner.runner(client._fname, pn)
 
 
-async def run_multi_pn_with_time_threshold(time_threshold: int, pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> None:
+async def run_multi_pn_with_time_threshold(
+    time_threshold: int, pn_gen: Generator[int, None, None] = range(4, 0, -1)
+) -> None:
     """
     清洗多个页码中的较新内容 将禁用历史状态缓存以允许重复检查
 
@@ -107,19 +109,19 @@ async def run_multi_pn_with_time_threshold(time_threshold: int, pn_gen: Generato
         await threads.runner.runner(client._fname, pn)
 
 
-async def test(tid: int, pid: int = 0, is_floor: bool = False) -> Optional[Punish]:
+async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Punish]:
     client = await get_client()
     if not pid:
         posts = await client.get_posts(tid, rn=0)
         thread.checker.set_checker(True, False)(thread.checker.ori_checker)
         return await thread.checker.checker(posts.thread)
     else:
-        if not is_floor:
-            comments = await client.get_comments(tid, pid, is_floor=False)
+        if not is_comment:
+            comments = await client.get_comments(tid, pid, is_comment=False)
             post.checker.set_checker(True, False)(post.checker.ori_checker)
             return await post.checker.checker(comments.post)
         else:
-            comments = await client.get_comments(tid, pid, is_floor=True)
+            comments = await client.get_comments(tid, pid, is_comment=True)
             for _comment in comments:
                 if _comment.pid == pid:
                     comment.checker.set_checker(True, False)(comment.checker.ori_checker)
@@ -128,12 +130,15 @@ async def test(tid: int, pid: int = 0, is_floor: bool = False) -> Optional[Punis
 
 
 @contextlib.contextmanager
-def no_test() -> None:
+def no_test(use_del_list=False) -> None:
     """
     取消测试模式以实际执行删封
+
+    Args:
+        use_del_list (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
     """
 
-    executor.punish_executor = executor.default_punish_executor
+    executor.punish_executor = executor.group_punish_executor if use_del_list else executor.default_punish_executor
     thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
     yield
