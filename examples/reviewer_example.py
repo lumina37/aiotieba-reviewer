@@ -129,7 +129,7 @@ if __name__ == "__main__":
         tbr.set_fname('孙笑川')
 
         if args.no_test:
-            with tbr.no_test():
+            async with tbr.no_test():
                 await tbr.run()
         else:
             await tbr.run(35.0)
