@@ -1,5 +1,5 @@
 import asyncio
-from typing import Awaitable, Callable, Optional, Protocol
+from typing import AsyncContextManager, Awaitable, Callable, Optional, Protocol
 
 from aiotieba import LOG
 
@@ -8,9 +8,12 @@ from .enums import Ops
 from .punish import Punish
 
 
-class TypeDeleteList(Protocol):
+class TypeDeleteList(AsyncContextManager, Protocol):
     async def append(self, pid: int) -> None:
-        pass
+        ...
+
+    async def group_punish_executor(self, punish: Punish) -> Optional[Punish]:
+        ...
 
 
 class DeleteList(object):
@@ -39,6 +42,13 @@ class DeleteList(object):
         self._delete_task: asyncio.Task = None
         self._pids = []
 
+    async def __aenter__(self) -> "DeleteList":
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self._pids:
+            await self._delete_30()
+
     async def append(self, pid: int) -> None:
         """
         将一个pid推入待删除列表
@@ -52,12 +62,12 @@ class DeleteList(object):
         if len(self._pids) >= self._maxlen:
             if not self._delete_task.done():
                 self._delete_task.cancel()
-            await self._delete_all()
+            await self._delete_30()
         else:
             if self._delete_task is None or self._delete_task.done():
                 self._delete_task = asyncio.create_task(self._delete_all_after_sleep())
 
-    async def _delete_all(self) -> None:
+    async def _delete_30(self) -> None:
         client = await get_client()
         pids = self._pids[:30]
         self._pids = self._pids[30:]
@@ -66,64 +76,48 @@ class DeleteList(object):
     async def _delete_all_after_sleep(self) -> None:
         try:
             await asyncio.sleep(self._execute_timeout)
-            await self._delete_all()
+            await self._delete_30()
         except asyncio.CancelledError:
             return
 
+    async def group_punish_executor(self, punish: Punish) -> Optional[Punish]:
+        if day := punish.day:
+            client = await get_client()
+            await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
 
-delete_list = DeleteList()
-
-
-def set_delete_list(_delete_list: TypeDeleteList) -> None:
-    """
-    设置删除列表
-
-    Args:
-        delete_list (TypeDeleteList)
-    """
-
-    global delete_list
-    delete_list = _delete_list
+        op = punish.op
+        if op == Ops.NORMAL:
+            return
+        if op == Ops.DELETE:
+            LOG().info(
+                f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+            )
+            await self.append(punish.obj.pid)
+            return
+        if op == Ops.DEBUG:
+            LOG().info(
+                f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+            )
+            return
+        if op == Ops.HIDE:
+            LOG().info(
+                f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+            )
+            client = await get_client()
+            await client.hide_thread(get_fname(), punish.obj.tid)
+            return
+        if op & Ops.PARENT == Ops.PARENT:
+            op &= ~Ops.PARENT
+            punish.op = op
+            return punish
+        if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
+            op &= ~Ops.GRANDPARENT
+            op &= Ops.PARENT
+            punish.op = op
+            return punish
 
 
 TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
-
-
-async def group_punish_executor(punish: Punish) -> Optional[Punish]:
-    if day := punish.day:
-        client = await get_client()
-        await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
-
-    op = punish.op
-    if op == Ops.NORMAL:
-        return
-    if op == Ops.DELETE:
-        LOG().info(
-            f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
-        )
-        await delete_list.append(punish.obj.pid)
-        return
-    if op == Ops.DEBUG:
-        LOG().info(
-            f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
-        )
-        return
-    if op == Ops.HIDE:
-        LOG().info(
-            f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
-        )
-        client = await get_client()
-        await client.hide_thread(get_fname(), punish.obj.tid)
-        return
-    if op & Ops.PARENT == Ops.PARENT:
-        op &= ~Ops.PARENT
-        punish.op = op
-        return punish
-    if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
-        op &= ~Ops.GRANDPARENT
-        op &= Ops.PARENT
-        punish.op = op
-        return punish
 
 
 async def default_punish_executor(punish: Punish) -> Optional[Punish]:
