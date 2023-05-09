@@ -145,10 +145,10 @@ async def no_test(use_del_list=False) -> None:
         if use_del_list:
             async with executor.DeleteList() as del_list:
                 executor.punish_executor = del_list.group_punish_executor
+                yield
         else:
             executor.punish_executor = executor.default_punish_executor
-
-        yield
+            yield
 
     except Exception:
         import traceback
