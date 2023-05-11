@@ -24,14 +24,17 @@ def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
             try:
                 return await func(self, *args, **kwargs)
             except aiomysql.Error as err:
-                code = err.args[0]
-                if code == 2003:
-                    LOG().warning("无法连接数据库 将尝试自动建库")
-                    await self.create_database()
-                    await create_table_func(self)
-                elif code == 1146:
-                    LOG().warning("表不存在 将尝试自动建表")
-                    await create_table_func(self)
+                try:
+                    code = err.args[0]
+                    if code == 2003:
+                        LOG().warning("无法连接数据库 将尝试自动建库")
+                        await self.create_database()
+                        await create_table_func(self)
+                    elif code == 1146:
+                        LOG().warning("表不存在 将尝试自动建表")
+                        await create_table_func(self)
+                except Exception:
+                    pass
             return default_ret
 
         return wrapper
