@@ -249,7 +249,7 @@ class Listener(object):
         await self.listener.__aenter__()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type=None, exc_val=None, exc_tb=None) -> None:
         await asyncio.gather(
             *[c.__aexit__() for c in itertools.chain.from_iterable(self.admins.values())], self.listener.__aexit__()
         )
