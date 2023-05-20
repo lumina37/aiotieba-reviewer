@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple
 
 import aiotieba as tb
 from aiotieba.api.get_homepage import Thread_home, UserInfo_home
-from aiotieba.api.get_posts import UserInfo_pt
 from aiotieba.typing import Comment, Post, Thread
 from cacheout import Cache
 
@@ -39,7 +38,7 @@ async def check_thread(thread: Thread) -> Optional[Punish]:
         if re.search(r'氵|\+3|➕3|加三|加3|经验|jy', thread.text):
             return Punish(thread, Ops.DELETE, 1, note="单开水楼")
 
-    user: UserInfo_pt = thread.user
+    user = thread.user
 
     # 作图广告
     for at in thread.contents.ats:
@@ -130,7 +129,7 @@ if __name__ == "__main__":
         tbr.set_fname('孙笑川')
 
         if args.no_test:
-            with tbr.no_test():
+            async with tbr.no_test():
                 await tbr.run()
         else:
             await tbr.run(35.0)

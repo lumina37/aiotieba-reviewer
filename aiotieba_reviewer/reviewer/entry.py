@@ -129,8 +129,8 @@ async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Pun
             LOG().warning("Comment not exist")
 
 
-@contextlib.contextmanager
-def no_test(use_del_list=False) -> None:
+@contextlib.asynccontextmanager
+async def no_test(use_del_list=False) -> None:
     """
     取消测试模式以实际执行删封
 
@@ -138,10 +138,23 @@ def no_test(use_del_list=False) -> None:
         use_del_list (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
     """
 
-    executor.punish_executor = executor.group_punish_executor if use_del_list else executor.default_punish_executor
     thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
-    yield
+
+    try:
+        if use_del_list:
+            async with executor.DeleteList() as del_list:
+                executor.punish_executor = del_list.group_punish_executor
+                yield
+        else:
+            executor.punish_executor = executor.default_punish_executor
+            yield
+
+    except Exception:
+        import traceback
+
+        LOG().critical(traceback.format_exc())
+
     executor.punish_executor = executor.default_punish_executor_test
     thread.runner.set_thread_runner(True)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(True)(threads.runner.ori_runner)
