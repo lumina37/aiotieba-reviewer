@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-dependencies = ["aiotieba[img,speedup]<4.0,>=3.4.0", "aiomysql<0.2,>=0.1.0"]
+dependencies = ["aiotieba[img,speedup]<4.0,>=3.4.0", "aiomysql<0.3,>=0.1.0"]
 dynamic = ["version"]
 
 [tool.setuptools.packages.find]
