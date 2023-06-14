@@ -619,7 +619,7 @@ class Listener(object):
 
         await self.__cmd_set(ctx, -5, note, user_id=ctx.parent.author_id)
 
-    @check_and_log(need_permission=4, need_arg_num=0)
+    @check_and_log(need_permission=5, need_arg_num=0)
     async def cmd_avada_kedavra(self, ctx: Context) -> None:
         """
         索命咒
