@@ -12,7 +12,6 @@ authors = [{ name = "Starry-OvO", email = "starry.qvq@gmail.com" }]
 keywords = ["baidu", "tieba"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Framework :: AsyncIO",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: The Unlicense (Unlicense)",
     "Operating System :: OS Independent",
