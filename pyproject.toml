@@ -3,12 +3,11 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-urls = { Repository = "https://github.com/Starry-OvO/aiotieba-reviewer/", Documentation = "https://review.aiotieba.cc/" }
 name = "aiotieba-reviewer"
 description = "Reviewer Framework based on aiotieba"
-readme = "README.md"
-requires-python = ">=3.8"
 authors = [{ name = "Starry-OvO", email = "starry.qvq@gmail.com" }]
+urls = { Repository = "https://github.com/Starry-OvO/aiotieba-reviewer/", Documentation = "https://review.aiotieba.cc/" }
+readme = "README.md"
 keywords = ["baidu", "tieba"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -21,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
+requires-python = ">=3.8"
 dependencies = ["aiotieba[img,speedup]<4.0,>=3.4.0", "aiomysql<0.3,>=0.1.0"]
 dynamic = ["version"]
 
