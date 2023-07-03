@@ -2,8 +2,8 @@ import asyncio
 import contextlib
 from typing import Generator, List, NoReturn, Optional
 
-from aiotieba import LOG
 from aiotieba.enums import PostSortType
+from aiotieba.logging import get_logger as LOG
 
 from .. import client, executor
 from ..client import get_client

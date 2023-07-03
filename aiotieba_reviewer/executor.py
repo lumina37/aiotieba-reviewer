@@ -1,7 +1,7 @@
 import asyncio
 from typing import AsyncContextManager, Awaitable, Callable, Optional, Protocol
 
-from aiotieba import LOG
+from aiotieba.logging import get_logger as LOG
 
 from .client import get_client, get_fname
 from .enums import Ops

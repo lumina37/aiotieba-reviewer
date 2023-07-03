@@ -2,7 +2,7 @@ from typing import Tuple
 
 import cv2 as cv
 import numpy as np
-from aiotieba import LOG
+from aiotieba.logging import get_logger as LOG
 
 from .client import get_db
 

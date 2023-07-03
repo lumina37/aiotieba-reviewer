@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
 import aiomysql
-from aiotieba import LOG
 from aiotieba.config import CONFIG
+from aiotieba.logging import get_logger as LOG
 from aiotieba.typing import UserInfo
 
 
