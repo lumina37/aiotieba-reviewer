@@ -755,7 +755,7 @@ class Listener(object):
 
         user = await self.__arg2user_info(ctx.args[0])
 
-        if await ctx.admin.blacklist_add(ctx.fname, user.user_id):
+        if await ctx.admin.add_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=3, need_arg_num=1)
@@ -767,7 +767,7 @@ class Listener(object):
 
         user = await self.__arg2user_info(ctx.args[0])
 
-        if await ctx.admin.blacklist_del(ctx.fname, user.user_id):
+        if await ctx.admin.del_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=1, need_arg_num=0)
