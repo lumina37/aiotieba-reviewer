@@ -4,7 +4,7 @@ import re
 from typing import List, Optional, Tuple
 
 import aiotieba as tb
-from aiotieba.api.get_homepage import Thread_pf, UserInfo_pf
+from aiotieba.api.profile import Thread_pf, UserInfo_pf
 from aiotieba.typing import Comment, Post, Thread
 from cacheout import Cache
 
