@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable
 
-from aiotieba import LOG
+from aiotieba.logging import get_logger as LOG
 
 from ... import executor
 from ...perf_stat import aperf_stat

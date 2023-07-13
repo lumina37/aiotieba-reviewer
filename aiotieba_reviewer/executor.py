@@ -1,7 +1,7 @@
 import asyncio
 from typing import AsyncContextManager, Awaitable, Callable, Optional, Protocol
 
-from aiotieba import LOG
+from aiotieba.logging import get_logger as LOG
 
 from .client import get_client, get_fname
 from .enums import Ops
@@ -90,18 +90,18 @@ class DeleteList(object):
             return
         if op == Ops.DELETE:
             LOG().info(
-                f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+                f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
             )
             await self.append(punish.obj.pid)
             return
         if op == Ops.DEBUG:
             LOG().info(
-                f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+                f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
             )
             return
         if op == Ops.HIDE:
             LOG().info(
-                f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+                f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
             )
             client = await get_client()
             await client.hide_thread(get_fname(), punish.obj.tid)
@@ -130,19 +130,19 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         return
     if op == Ops.DELETE:
         LOG().info(
-            f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+            f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
         )
         client = await get_client()
         await client.del_post(punish.obj.fid, punish.obj.pid)
         return
     if op == Ops.DEBUG:
         LOG().info(
-            f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+            f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
         )
         return
     if op == Ops.HIDE:
         LOG().info(
-            f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+            f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
         )
         client = await get_client()
         await client.hide_thread(get_fname(), punish.obj.tid)
@@ -173,18 +173,18 @@ class _punish_executor_test(object):
             return
         if op == Ops.DELETE:
             LOG().info(
-                f"Del {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+                f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
             )
             self.punishes.append(punish)
             return
         if op == Ops.DEBUG:
             LOG().info(
-                f"Debug {punish.obj.__class__.__name__}. obj={punish.obj} user={punish.obj.user!r} note={punish.note}"
+                f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
             )
             return
         if op == Ops.HIDE:
             LOG().info(
-                f"Hide {punish.obj.__class__.__name__}. text={punish.obj.text} user={punish.obj.user!r} note={punish.note}"
+                f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
             )
             self.punishes.append(punish)
             return

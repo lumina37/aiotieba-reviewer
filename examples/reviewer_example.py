@@ -4,7 +4,7 @@ import re
 from typing import List, Optional, Tuple
 
 import aiotieba as tb
-from aiotieba.api.get_homepage import Thread_home, UserInfo_home
+from aiotieba.api.profile import Thread_pf, UserInfo_pf
 from aiotieba.typing import Comment, Post, Thread
 from cacheout import Cache
 
@@ -26,8 +26,8 @@ async def portrait_hasQR(client: tb.Client, portrait: str) -> bool:
 
 # 同理 缓存返回的结果
 @Cache(maxsize=64).memoize()
-async def get_homepage(client: tb.Client, portrait: str) -> Tuple[UserInfo_home, List[Thread_home]]:
-    return await client.get_homepage(portrait, with_threads=True)
+async def get_homepage(client: tb.Client, user_id: int) -> Tuple[UserInfo_pf, List[Thread_pf]]:
+    return await client.get_homepage(user_id)
 
 
 # 使用装饰器将以下函数设置为针对主题帖的checker
@@ -54,7 +54,7 @@ async def check_thread(thread: Thread) -> Optional[Punish]:
     if user.level >= 4 or user.glevel >= 4 or user.priv_like == 3:
         return
 
-    hpuser, hpthreads = await get_homepage(client, user.portrait)
+    hpuser, hpthreads = await get_homepage(client, user.user_id)
 
     # 用户个性签名是否包含违规内容
     if sign_check_exp.search(hpuser.sign):

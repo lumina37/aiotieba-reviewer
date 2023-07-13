@@ -11,8 +11,11 @@ from aiotieba.api.get_ats import At
 from aiotieba.api.get_comments._classdef import Contents_cp
 from aiotieba.api.get_posts._classdef import Contents_p, Contents_pt
 from aiotieba.config import tomllib
+from aiotieba.logging import get_logger as LOG
 
 import aiotieba_reviewer as tbr
+
+tb.logging.enable_filelog()
 
 with open("cmd_handler.toml", 'rb') as file:
     LISTEN_CONFIG = tomllib.load(file)
@@ -216,7 +219,7 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0):
                 ctx.admin, ctx.admin_db, ctx.speaker = await self.get_admin(ctx.fname)
 
                 await ctx._init()
-                tb.LOG().info(f"user={ctx.user} type={ctx.cmd_type} args={ctx.args} tid={ctx.tid}")
+                LOG().info(f"user={ctx.user} type={ctx.cmd_type} args={ctx.args} tid={ctx.tid}")
 
                 if len(ctx.args) < need_arg_num:
                     raise ValueError("参数量不足")
@@ -226,7 +229,7 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0):
                 await func(self, ctx)
 
             except Exception as err:
-                tb.LOG().error(err)
+                LOG().error(err)
 
         return _
 
@@ -258,13 +261,13 @@ class Listener(object):
         while 1:
             try:
                 asyncio.create_task(self.__fetch_and_execute_cmds())
-                tb.LOG().debug('heartbeat')
+                LOG().debug('heartbeat')
                 await asyncio.sleep(4.0)
 
             except asyncio.CancelledError:
                 return
             except Exception:
-                tb.LOG().critical("Unhandled error", exc_info=True)
+                LOG().critical("Unhandled error", exc_info=True)
                 return
 
     async def get_admin(self, fname: str) -> Tuple[tb.Client, tbr.MySQLDB, tb.Client]:
@@ -341,7 +344,7 @@ class Listener(object):
         if new_permission >= ctx.permission:
             raise ValueError("新权限大于等于操作者权限")
 
-        tb.LOG().info(f"forum={ctx.fname} user_id={user_id} old_note={old_note}")
+        LOG().info(f"forum={ctx.fname} user_id={user_id} old_note={old_note}")
 
         if new_permission != 0:
             success = await ctx.admin_db.add_user_id(user_id, new_permission, note=note)
@@ -486,7 +489,7 @@ class Listener(object):
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
 
-        tb.LOG().info(f"Try to del {ctx.parent.__class__.__name__}. parent={ctx.parent} user_id={ctx.parent.author_id}")
+        LOG().info(f"Try to del {ctx.parent.__class__.__name__}. parent={ctx.parent} user_id={ctx.parent.author_id}")
 
         if ctx.at.is_thread:
             if ctx.fname != ctx.parent.fname:
@@ -755,7 +758,7 @@ class Listener(object):
 
         user = await self.__arg2user_info(ctx.args[0])
 
-        if await ctx.admin.blacklist_add(ctx.fname, user.user_id):
+        if await ctx.admin.add_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=3, need_arg_num=1)
@@ -767,7 +770,7 @@ class Listener(object):
 
         user = await self.__arg2user_info(ctx.args[0])
 
-        if await ctx.admin.blacklist_del(ctx.fname, user.user_id):
+        if await ctx.admin.del_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.pid)
 
     @check_and_log(need_permission=1, need_arg_num=0)
