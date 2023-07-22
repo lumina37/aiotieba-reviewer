@@ -94,11 +94,8 @@ class DeleteList(object):
             )
             await self.append(punish.obj.pid)
             return
-        if op == Ops.DEBUG:
-            LOG().info(
-                f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            return
+        if op == Ops.PENDING:
+            return punish
         if op == Ops.HIDE:
             LOG().info(
                 f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
@@ -135,11 +132,8 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         client = await get_client()
         await client.del_post(punish.obj.fid, punish.obj.pid)
         return
-    if op == Ops.DEBUG:
-        LOG().info(
-            f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
-        )
-        return
+    if op == Ops.PENDING:
+        return punish
     if op == Ops.HIDE:
         LOG().info(
             f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
@@ -177,11 +171,8 @@ class _punish_executor_test(object):
             )
             self.punishes.append(punish)
             return
-        if op == Ops.DEBUG:
-            LOG().info(
-                f"Debug {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} obj={punish.obj} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            return
+        if op == Ops.PENDING:
+            return punish
         if op == Ops.HIDE:
             LOG().info(
                 f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"

@@ -16,21 +16,24 @@ class Punish(object):
 
     __slots__ = [
         'obj',
+        'line',
         'op',
         'day',
-        'trace',
-        'note',
+        '_note',
+        '_raw_note',
     ]
 
     def __init__(self, obj: TypeObj, op: Ops = Ops.NORMAL, day: int = 0, note: str = ''):
         self.obj = obj
         self.op = op
         self.day = day
+        self._note = None
         if op > Ops.NORMAL:
-            line = sys._getframe(1).f_lineno
-            self.note = f"L{line} {note}"
+            self.line = sys._getframe(1).f_lineno
+            self._raw_note = note
         else:
-            self.note = note
+            self.line = 0
+            self._raw_note = ''
 
     def __bool__(self) -> bool:
         if self.op > Ops.NORMAL:
@@ -54,3 +57,9 @@ class Punish(object):
         if rhs.op > self.op:
             return rhs
         return self
+
+    @property
+    def note(self) -> str:
+        if self._note is None:
+            self._note = f"L{self.line} {self._raw_note}"
+        return self._note
