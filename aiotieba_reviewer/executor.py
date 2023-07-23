@@ -109,7 +109,7 @@ class DeleteList(object):
             return punish
         if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
             op &= ~Ops.GRANDPARENT
-            op &= Ops.PARENT
+            op |= Ops.PARENT
             punish.op = op
             return punish
 
@@ -147,7 +147,7 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         return punish
     if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
         op &= ~Ops.GRANDPARENT
-        op &= Ops.PARENT
+        op |= Ops.PARENT
         punish.op = op
         return punish
 
@@ -184,7 +184,7 @@ class _punish_executor_test(object):
             return Punish(op, punish.day, punish.note)
         if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
             op &= ~Ops.GRANDPARENT
-            op &= Ops.PARENT
+            op |= Ops.PARENT
             return Punish(op, punish.day, punish.note)
 
 
