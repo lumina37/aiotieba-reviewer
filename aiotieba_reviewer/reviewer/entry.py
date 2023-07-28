@@ -130,25 +130,17 @@ async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Pun
 
 
 @contextlib.asynccontextmanager
-async def no_test(use_del_list=False) -> None:
+async def no_test() -> None:
     """
     取消测试模式以实际执行删封
-
-    Args:
-        use_del_list (bool): 是否使用更节省带宽但延迟更高的批量删除模式. Defaults to False.
     """
 
     thread.runner.set_thread_runner(False)(thread.runner.ori_runner)
     threads.runner.set_threads_runner(False)(threads.runner.ori_runner)
 
     try:
-        if use_del_list:
-            async with executor.DeleteList() as del_list:
-                executor.punish_executor = del_list.group_punish_executor
-                yield
-        else:
-            executor.punish_executor = executor.default_punish_executor
-            yield
+        executor.punish_executor = executor.default_punish_executor
+        yield
 
     except Exception:
         import traceback
