@@ -1,118 +1,10 @@
-import asyncio
-from typing import AsyncContextManager, Awaitable, Callable, Optional, Protocol
+from typing import Awaitable, Callable, Optional
 
 from aiotieba.logging import get_logger as LOG
 
 from .client import get_client, get_fname
 from .enums import Ops
 from .punish import Punish
-
-
-class TypeDeleteList(AsyncContextManager, Protocol):
-    async def append(self, pid: int) -> None:
-        ...
-
-    async def group_punish_executor(self, punish: Punish) -> Optional[Punish]:
-        ...
-
-
-class DeleteList(object):
-    """
-    待删除pid的列表
-
-    execute_timeout (float): 插入元素后，若发现没有计划中的删除任务
-        则在execute_timeout秒后执行一次删除操作. Defaults to 10.0.
-    maxlen (int): 列表长度达到该值时立刻触发一次删除. Defaults to 30.
-
-    Note:
-        如果在计划的删除任务实施前，因为列表长度超限而触发了一次删除
-        那么计划的删除任务会被取消
-    """
-
-    __slots__ = [
-        '_execute_timeout',
-        '_maxlen',
-        '_delete_task',
-        '_pids',
-    ]
-
-    def __init__(self, execute_timeout: float = 10.0, maxlen=30) -> None:
-        self._execute_timeout = execute_timeout
-        self._maxlen = maxlen
-        self._delete_task: asyncio.Task = None
-        self._pids = []
-
-    async def __aenter__(self) -> "DeleteList":
-        return self
-
-    async def __aexit__(self, exc_type=None, exc_val=None, exc_tb=None) -> None:
-        if self._pids:
-            await self._delete_30()
-
-    async def append(self, pid: int) -> None:
-        """
-        将一个pid推入待删除列表
-
-        Args:
-            pid (int)
-        """
-
-        self._pids.append(pid)
-
-        if len(self._pids) >= self._maxlen:
-            if not self._delete_task.done():
-                self._delete_task.cancel()
-            await self._delete_30()
-        else:
-            if self._delete_task is None or self._delete_task.done():
-                self._delete_task = asyncio.create_task(self._delete_all_after_sleep())
-
-    async def _delete_30(self) -> None:
-        client = await get_client()
-        pids = self._pids[:30]
-        self._pids = self._pids[30:]
-        await client.del_posts(get_fname(), pids)
-
-    async def _delete_all_after_sleep(self) -> None:
-        try:
-            await asyncio.sleep(self._execute_timeout)
-            await self._delete_30()
-        except asyncio.CancelledError:
-            return
-
-    async def group_punish_executor(self, punish: Punish) -> Optional[Punish]:
-        if day := punish.day:
-            client = await get_client()
-            await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
-
-        op = punish.op
-        if op == Ops.NORMAL:
-            return
-        if op == Ops.DELETE:
-            LOG().info(
-                f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            await self.append(punish.obj.pid)
-            return
-        if op == Ops.PENDING:
-            return punish
-        if op == Ops.HIDE:
-            LOG().info(
-                f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            client = await get_client()
-            await client.hide_thread(get_fname(), punish.obj.tid)
-            return
-        if op & Ops.PARENT == Ops.PARENT:
-            op &= ~Ops.PARENT
-            punish.op = op
-            return punish
-        if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
-            op &= ~Ops.GRANDPARENT
-            op |= Ops.PARENT
-            punish.op = op
-            return punish
-
 
 TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
 
@@ -130,7 +22,7 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
             f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
         )
         client = await get_client()
-        await client.del_post(punish.obj.fid, punish.obj.pid)
+        await client.del_post(punish.obj.fid, punish.obj.tid, punish.obj.pid)
         return
     if op == Ops.PENDING:
         return punish
