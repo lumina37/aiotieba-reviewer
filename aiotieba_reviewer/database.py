@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import sqlite3
+import ssl
 from pathlib import Path
 from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
@@ -84,6 +85,10 @@ class MySQLDB(object):
         """
 
         db_config = CONFIG.get('Database', {})
+        ctx = None
+        if db_config.get("ssl"):
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.load_verify_locations(cafile=db_config.get("ssl"))
         self._pool: aiomysql.Pool = await aiomysql.create_pool(
             user=db_config['user'],
             password=db_config['password'],
@@ -96,6 +101,7 @@ class MySQLDB(object):
             host=db_config.get('host', 'localhost'),
             port=db_config.get('port', self._default_port),
             unix_socket=db_config.get('unix_socket'),
+            ssl=ctx,
         )
 
     async def create_database(self) -> bool:
@@ -109,6 +115,10 @@ class MySQLDB(object):
         db_config: dict = CONFIG['Database']
 
         try:
+            ctx = None
+            if db_config.get("ssl"):
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                ctx.load_verify_locations(cafile=db_config.get("ssl"))
             conn: aiomysql.Connection = await aiomysql.connect(
                 host=db_config.get('host', 'localhost'),
                 port=db_config.get('port', self._default_port),
@@ -117,6 +127,7 @@ class MySQLDB(object):
                 unix_socket=db_config.get('unix_socket'),
                 autocommit=True,
                 loop=asyncio.get_running_loop(),
+                ssl=ctx,
             )
 
             async with conn.cursor() as cursor:
