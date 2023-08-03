@@ -27,4 +27,5 @@ password = ""                             # 填密码
 db = "aiotieba"                           # 使用的数据库名，不填则默认为aiotieba
 unix_socket = "/var/lib/mysql/mysql.sock" # 用于优化linux系统的本机连接速度，看不懂就不用填
 pool_recycle = 3600                       # 填连接超时的秒数，需要与服务端保持一致，不填则默认为28800秒
+ssl_cafile = "/path/to/your/cacert.file"  # 用于加密连接的CA证书的路径
 ```

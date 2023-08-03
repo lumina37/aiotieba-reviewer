@@ -85,10 +85,12 @@ class MySQLDB(object):
         """
 
         db_config = CONFIG.get('Database', {})
-        ctx = None
-        if db_config.get("ssl"):
-            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            ctx.load_verify_locations(cafile=db_config.get("ssl"))
+
+        ssl_ctx = None
+        if cafile := db_config.get('ssl_cafile'):
+            ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ssl_ctx.load_verify_locations(cafile=cafile)
+
         self._pool: aiomysql.Pool = await aiomysql.create_pool(
             user=db_config['user'],
             password=db_config['password'],
@@ -101,7 +103,7 @@ class MySQLDB(object):
             host=db_config.get('host', 'localhost'),
             port=db_config.get('port', self._default_port),
             unix_socket=db_config.get('unix_socket'),
-            ssl=ctx,
+            ssl=ssl_ctx,
         )
 
     async def create_database(self) -> bool:
@@ -115,10 +117,6 @@ class MySQLDB(object):
         db_config: dict = CONFIG['Database']
 
         try:
-            ctx = None
-            if db_config.get("ssl"):
-                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-                ctx.load_verify_locations(cafile=db_config.get("ssl"))
             conn: aiomysql.Connection = await aiomysql.connect(
                 host=db_config.get('host', 'localhost'),
                 port=db_config.get('port', self._default_port),
@@ -127,7 +125,7 @@ class MySQLDB(object):
                 unix_socket=db_config.get('unix_socket'),
                 autocommit=True,
                 loop=asyncio.get_running_loop(),
-                ssl=ctx,
+                ssl=self._pool._conn_kwargs['ssl'],
             )
 
             async with conn.cursor() as cursor:
