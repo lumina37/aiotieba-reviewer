@@ -10,7 +10,7 @@ class Punish(object):
 
     Attributes:
         op (Ops, optional): 删除类型. Defaults to Ops.NORMAL.
-        days (int, optional): 封禁天数. Defaults to 0.
+        day (int, optional): 封禁天数. Defaults to 0.
         note (str, optional): 处罚理由. Defaults to ''.
     """
 
