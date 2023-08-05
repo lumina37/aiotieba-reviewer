@@ -641,6 +641,8 @@ class Listener(object):
                 if thread.fname != ctx.fname:
                     continue
                 await ctx.admin.del_post(thread.fid, thread.tid, thread.pid)
+            if len(threads) < 60:
+                break
 
     @check_and_log(need_permission=4, need_arg_num=2)
     async def cmd_set(self, ctx: Context) -> None:
