@@ -46,8 +46,7 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
 
 async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
     if day := punish.day:
-        client = await get_client()
-        await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
+        LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
 
     op = punish.op
     if op == Ops.NORMAL:
@@ -56,7 +55,6 @@ async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
         LOG().info(
             f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
         )
-        client = await get_client()
         return
     if op == Ops.PENDING:
         return punish
@@ -64,7 +62,6 @@ async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
         LOG().info(
             f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
         )
-        client = await get_client()
         return
     if op & Ops.PARENT == Ops.PARENT:
         op &= ~Ops.PARENT
