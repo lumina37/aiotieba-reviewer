@@ -635,14 +635,17 @@ class Listener(object):
         user_id = ctx.parent.author_id
         await self.__cmd_set(ctx, -5, note, user_id=user_id)
 
+        dthreads = []
         for pn in range(1, 0xFFFF):
             threads = await ctx.admin.get_user_threads(user_id, pn)
             for thread in threads:
                 if thread.fname != ctx.fname:
                     continue
-                await ctx.admin.del_post(thread.fid, thread.tid, thread.pid)
+                dthreads.append(thread)
             if len(threads) < 60:
                 break
+        for thread in dthreads:
+            await ctx.admin.del_post(thread.fid, thread.tid, thread.pid)
 
     @check_and_log(need_permission=4, need_arg_num=2)
     async def cmd_set(self, ctx: Context) -> None:
