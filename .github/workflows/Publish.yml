@@ -7,22 +7,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_sdist:
-    name: Build source distribution
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build sdist
-        run: pipx run build --sdist
+      - name: Build
+        run: pipx run build
 
       - uses: actions/upload-artifact@v3
         with:
-          path: dist/*.tar.gz
+          path: dist/*
 
   publish:
     name: Publish
-    needs: build_sdist
+    needs: build
     runs-on: ubuntu-latest
 
     environment:
