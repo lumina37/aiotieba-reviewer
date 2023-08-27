@@ -44,43 +44,34 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         return punish
 
 
-class _punish_executor_test(object):
-    __slots__ = ['punishes']
+async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
+    if day := punish.day:
+        LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
 
-    def __init__(self) -> None:
-        self.punishes = []
-
-    async def __call__(self, punish: Punish) -> Optional[Punish]:
-        if day := punish.day:
-            LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
-
-        op = punish.op
-        if op == Ops.NORMAL:
-            return
-        if op == Ops.DELETE:
-            LOG().info(
-                f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            self.punishes.append(punish)
-            return
-        if op == Ops.PENDING:
-            return punish
-        if op == Ops.HIDE:
-            LOG().info(
-                f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-            )
-            self.punishes.append(punish)
-            return
-        if op & Ops.PARENT == Ops.PARENT:
-            op &= ~Ops.PARENT
-            return Punish(op, punish.day, punish.note)
-        if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
-            op &= ~Ops.GRANDPARENT
-            op |= Ops.PARENT
-            return Punish(op, punish.day, punish.note)
-
-
-default_punish_executor_test = _punish_executor_test()
+    op = punish.op
+    if op == Ops.NORMAL:
+        return
+    if op == Ops.DELETE:
+        LOG().info(
+            f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
+        )
+        return
+    if op == Ops.PENDING:
+        return punish
+    if op == Ops.HIDE:
+        LOG().info(
+            f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
+        )
+        return
+    if op & Ops.PARENT == Ops.PARENT:
+        op &= ~Ops.PARENT
+        punish.op = op
+        return punish
+    if op & Ops.GRANDPARENT == Ops.GRANDPARENT:
+        op &= ~Ops.GRANDPARENT
+        op |= Ops.PARENT
+        punish.op = op
+        return punish
 
 
 punish_executor = default_punish_executor_test
