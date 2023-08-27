@@ -27,24 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Python ${{ env.PYTHON_VER }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VER }}
-
       - name: Install dependencies
         run: |
-          pip install -U pip -qq
-          pip install mkdocs-material -qq
+          pipx install pdm
+          pdm install -G doc --no-default
 
       - name: Build
         run: |
-          mkdocs build -d _site -s -q
+          pdm run mkdocs build -d site -s
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: _site
+          path: site
 
   deploy:
     needs: build
@@ -62,4 +57,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2

@@ -33,6 +33,9 @@ version = { attr = "aiotieba_reviewer.__version__.__version__" }
 [tool.setuptools.package-data]
 "*" = ["*.pyi"]
 
+[tool.pdm.dev-dependencies]
+doc = ["mkdocs-material"]
+
 [tool.black]
 line-length = 120
 skip-string-normalization = true
