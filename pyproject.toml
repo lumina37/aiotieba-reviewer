@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiotieba-reviewer"
-description = "Reviewer Framework based on aiotieba"
+description = "High Flexibility Anti-spam Framework Based on Aiotieba"
 authors = [{ name = "Starry-OvO", email = "starry.qvq@gmail.com" }]
 urls = { Repository = "https://github.com/Starry-OvO/aiotieba-reviewer/", Documentation = "https://review.aiotieba.cc/" }
 readme = "README.md"
@@ -18,9 +18,10 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.13"
 dependencies = ["aiotieba[img,speedup]<4.0,>=3.6.0", "aiomysql[rsa]<0.3,>=0.1.0"]
 dynamic = ["version"]
 
@@ -39,7 +40,7 @@ doc = ["mkdocs-material"]
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ["py38"]
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 120
