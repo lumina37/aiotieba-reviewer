@@ -13,7 +13,7 @@ async def __default_producer(post: Post) -> List[Comment]:
     if reply_num > 10 or (len(post.comments) != reply_num and reply_num <= 10):
         last_comments = await client.get_comments(post.tid, post.pid, pn=post.reply_num // 30 + 1)
         comment_set = set(post.comments)
-        comment_set.update(last_comments._objs)
+        comment_set.update(last_comments.objs)
         comment_list = list(comment_set)
 
     else:
