@@ -2,6 +2,7 @@ from typing import AsyncGenerator
 
 import aiotieba as tb
 
+from .config import get_account
 from .database import MySQLDB, SQLiteDB
 
 _fname = ''
@@ -20,7 +21,8 @@ def set_BDUSS_key(BDUSS_key: str) -> None:
     """
 
     async def _client_generator():
-        async with tb.Client(BDUSS_key, try_ws=True) as client:
+        account = get_account(BDUSS_key)
+        async with tb.Client(account=account, try_ws=True) as client:
             while 1:
                 yield client
 

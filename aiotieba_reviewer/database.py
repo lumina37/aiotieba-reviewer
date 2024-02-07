@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Any, Callable, Final, List, Optional, Tuple, Union
 
 import aiomysql
-from aiotieba.config import CONFIG
 from aiotieba.logging import get_logger as LOG
 from aiotieba.typing import UserInfo
+
+from .config import DB_CONFIG
 
 
 def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
@@ -84,25 +85,23 @@ class MySQLDB(object):
         创建连接池
         """
 
-        db_config = CONFIG.get('Database', {})
-
         ssl_ctx = None
-        if cafile := db_config.get('ssl_cafile'):
+        if cafile := DB_CONFIG.get('ssl_cafile'):
             ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             ssl_ctx.load_verify_locations(cafile=cafile)
 
         self._pool: aiomysql.Pool = await aiomysql.create_pool(
-            user=db_config['user'],
-            password=db_config['password'],
-            db=db_config.get('db', self._default_db_name),
-            minsize=db_config.get('minsize', self._default_minsize),
-            maxsize=db_config.get('maxsize', self._default_maxsize),
-            pool_recycle=db_config.get('pool_recycle', self._default_pool_recycle),
+            user=DB_CONFIG['user'],
+            password=DB_CONFIG['password'],
+            db=DB_CONFIG.get('db', self._default_db_name),
+            minsize=DB_CONFIG.get('minsize', self._default_minsize),
+            maxsize=DB_CONFIG.get('maxsize', self._default_maxsize),
+            pool_recycle=DB_CONFIG.get('pool_recycle', self._default_pool_recycle),
             loop=asyncio.get_running_loop(),
             autocommit=True,
-            host=db_config.get('host', 'localhost'),
-            port=db_config.get('port', self._default_port),
-            unix_socket=db_config.get('unix_socket'),
+            host=DB_CONFIG.get('host', 'localhost'),
+            port=DB_CONFIG.get('port', self._default_port),
+            unix_socket=DB_CONFIG.get('unix_socket'),
             ssl=ssl_ctx,
         )
 
@@ -114,22 +113,20 @@ class MySQLDB(object):
             bool: 操作是否成功
         """
 
-        db_config: dict = CONFIG['Database']
-
         try:
             conn: aiomysql.Connection = await aiomysql.connect(
-                host=db_config.get('host', 'localhost'),
-                port=db_config.get('port', self._default_port),
-                user=db_config['user'],
-                password=db_config['password'],
-                unix_socket=db_config.get('unix_socket'),
+                host=DB_CONFIG.get('host', 'localhost'),
+                port=DB_CONFIG.get('port', self._default_port),
+                user=DB_CONFIG['user'],
+                password=DB_CONFIG['password'],
+                unix_socket=DB_CONFIG.get('unix_socket'),
                 autocommit=True,
                 loop=asyncio.get_running_loop(),
                 ssl=self._pool._conn_kwargs['ssl'],
             )
 
             async with conn.cursor() as cursor:
-                db_name = db_config.get('db', self._default_db_name)
+                db_name = DB_CONFIG.get('db', self._default_db_name)
                 await cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`")
 
             await self._create_pool()

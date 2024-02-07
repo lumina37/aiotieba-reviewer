@@ -89,7 +89,7 @@ async def run_multi_pn_with_time_threshold(
         for i, p in enumerate(last_posts):
             if p.create_time < time_threshold:
                 end_idx = i
-        post_list += last_posts._objs[:end_idx]
+        post_list += last_posts.objs[:end_idx]
 
         for pn in range(last_posts.page.total_page - 1, 0, -1):
             _posts = await _client.get_posts(
@@ -99,7 +99,7 @@ async def run_multi_pn_with_time_threshold(
             for i, p in enumerate(_posts):
                 if p.create_time < time_threshold:
                     end_idx = i
-            post_list += _posts._objs[:end_idx]
+            post_list += _posts.objs[:end_idx]
             if end_idx != len(_posts):
                 break
 

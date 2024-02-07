@@ -10,6 +10,7 @@ from .client import (
     set_BDUSS_key,
     set_fname,
 )
+from .config import get_account
 from .database import MySQLDB, SQLiteDB
 from .enums import Ops
 from .perf_stat import aperf_stat

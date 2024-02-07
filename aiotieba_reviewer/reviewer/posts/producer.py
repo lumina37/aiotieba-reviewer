@@ -23,20 +23,20 @@ async def __default_producer(thread: Thread) -> List[Post]:
         last_floor = last_posts[0].floor
         need_rn = last_floor - len(last_posts)
         if need_rn > 0:
-            post_set = set(last_posts._objs)
+            post_set = set(last_posts.objs)
             if need_rn <= 30:
                 first_posts = await client.get_posts(thread.tid, rn=need_rn, with_comments=True, comment_rn=10)
-                post_set.update(first_posts._objs)
+                post_set.update(first_posts.objs)
             else:
                 first_posts = await client.get_posts(thread.tid, rn=need_rn, with_comments=True, comment_rn=10)
-                post_set.update(first_posts._objs)
+                post_set.update(first_posts.objs)
                 hot_posts = await client.get_posts(thread.tid, sort=PostSortType.HOT, with_comments=True, comment_rn=10)
-                post_set.update(hot_posts._objs)
+                post_set.update(hot_posts.objs)
             post_list = list(post_set)
         else:
-            post_list = last_posts._objs
+            post_list = last_posts.objs
     else:
-        post_list = last_posts._objs
+        post_list = last_posts.objs
 
     return post_list
 
