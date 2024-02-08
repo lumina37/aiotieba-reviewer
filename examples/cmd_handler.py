@@ -430,16 +430,13 @@ class Listener(object):
         if await ctx.admin.unblock(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_drop(self, ctx: Context) -> None:
+    async def __cmd_drop(self, ctx: Context, day: int = 0) -> None:
         """
-        dropx指令
-        删帖并封x天
+        封禁用户并删除父级
         """
 
         await ctx.init_full()
 
-        day = int(d) if (d := ctx.cmd_type.removeprefix('drop')) else 10
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
 
         LOG().info(f"Try to del {ctx.parent.__class__.__name__}. parent={ctx.parent} user_id={ctx.parent.author_id}")
@@ -456,6 +453,16 @@ class Listener(object):
             ret = await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=day, reason=note)
             if isinstance(ret.err, tb.exception.TiebaServerError) and ret.err.code == 3150003:
                 await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=10, reason=note)
+
+    @check_and_log(need_permission=2, need_arg_num=0)
+    async def cmd_drop(self, ctx: Context) -> None:
+        """
+        dropx指令
+        删帖并封x天
+        """
+
+        day = int(d) if (d := ctx.cmd_type.removeprefix('drop')) else 10
+        await self.__cmd_drop(ctx, day)
 
     @check_and_log(need_permission=1, need_arg_num=0)
     async def cmd_recommend(self, ctx: Context) -> None:
@@ -568,10 +575,10 @@ class Listener(object):
     async def cmd_exdrop(self, ctx: Context) -> None:
         """
         exdrop指令
-        删帖并将发帖人加入脚本黑名单+封禁十天
+        删帖并将发帖人加入脚本黑名单+封禁90天
         """
 
-        await self.__cmd_drop(ctx, 10)
+        await self.__cmd_drop(ctx, 90)
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
 
@@ -584,7 +591,7 @@ class Listener(object):
         删帖 清空发帖人主页显示的在当前吧的所有主题帖 加入脚本黑名单+封禁十天
         """
 
-        await self.__cmd_drop(ctx, 10)
+        await self.__cmd_drop(ctx, 90)
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
         user_id = ctx.parent.author_id
