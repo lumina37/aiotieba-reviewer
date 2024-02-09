@@ -6,14 +6,12 @@ import time
 from typing import Protocol, Tuple, Union
 
 import aiotieba as tb
-import async_timeout
+import aiotieba_reviewer as tbr
 from aiotieba.api.get_ats import At
 from aiotieba.api.get_comments._classdef import Contents_cp
 from aiotieba.api.get_posts._classdef import Contents_p, Contents_pt
-from aiotieba.config import tomllib
 from aiotieba.logging import get_logger as LOG
-
-import aiotieba_reviewer as tbr
+from aiotieba_reviewer.config import tomllib
 
 tb.logging.enable_filelog()
 
@@ -59,28 +57,22 @@ class TimerRecorder(object):
 
 class TypeParent(Protocol):
     @property
-    def fid(self) -> int:
-        ...
+    def fid(self) -> int: ...
 
     @property
-    def fname(self) -> str:
-        ...
+    def fname(self) -> str: ...
 
     @property
-    def tid(self) -> int:
-        ...
+    def tid(self) -> int: ...
 
     @property
-    def pid(self) -> int:
-        ...
+    def pid(self) -> int: ...
 
     @property
-    def author_id(self) -> int:
-        ...
+    def author_id(self) -> int: ...
 
     @property
-    def contents(self) -> Union[Contents_pt, Contents_p, Contents_cp]:
-        ...
+    def contents(self) -> Union[Contents_pt, Contents_p, Contents_cp]: ...
 
 
 class Context(object):
@@ -244,7 +236,7 @@ class Listener(object):
     ]
 
     def __init__(self) -> None:
-        self.listener = tb.Client(LISTEN_CONFIG['listener'])
+        self.listener = tb.Client(account=tbr.get_account(LISTEN_CONFIG['listener']))
         self.admins = {}
         self.time_recorder = TimerRecorder(3600 * 12, 10)
 
@@ -278,11 +270,11 @@ class Listener(object):
             if cfg is None:
                 raise ValueError(f"找不到管理员. fname={fname}")
 
-            admin = tb.Client(cfg['admin'])
+            admin = tb.Client(account=tbr.get_account(cfg['admin']))
             await admin.__aenter__()
             admin_db = tbr.MySQLDB(fname)
             await admin_db.__aenter__()
-            speaker = tb.Client(cfg['speaker'])
+            speaker = tb.Client(account=tbr.get_account(cfg['speaker']))
             await speaker.__aenter__()
 
             tup = admin, admin_db, speaker
@@ -300,8 +292,14 @@ class Listener(object):
             await asyncio.gather(*[self._execute_cmd(at) for at in ats])
 
     async def _execute_cmd(self, at: At) -> None:
-        async with async_timeout.timeout(120.0):
+        async with asyncio.timeout(120.0):
             ctx = Context(at)
+            if ctx.cmd_type.startswith('block'):
+                await self.cmd_block(ctx)
+                return
+            if ctx.cmd_type.startswith('drop'):
+                await self.cmd_drop(ctx)
+                return
             cmd_func = getattr(self, f'cmd_{ctx.cmd_type}', self.cmd_default)
             await cmd_func(ctx)
 
@@ -406,39 +404,18 @@ class Listener(object):
     @check_and_log(need_permission=2, need_arg_num=1)
     async def cmd_block(self, ctx: Context) -> None:
         """
-        block指令
-        通过id封禁对应用户10天
+        blockx指令
+        通过id封禁对应用户x天
         """
 
-        await self.__cmd_block(ctx, 10)
-
-    @check_and_log(need_permission=2, need_arg_num=1)
-    async def cmd_block3(self, ctx: Context) -> None:
-        """
-        block3指令
-        通过id封禁对应用户3天
-        """
-
-        await self.__cmd_block(ctx, 3)
-
-    @check_and_log(need_permission=2, need_arg_num=1)
-    async def cmd_block1(self, ctx: Context) -> None:
-        """
-        block1指令
-        通过id封禁对应用户1天
-        """
-
-        await self.__cmd_block(ctx, 1)
-
-    async def __cmd_block(self, ctx: Context, day: int) -> None:
-        """
-        封禁用户
-        """
-
+        day = int(d) if (d := ctx.cmd_type.removeprefix('block')) else 10
         user = await self.__arg2user_info(ctx.args[0])
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
-        if await ctx.admin.block(ctx.fname, user.portrait, day=day, reason=note):
+        success = await ctx.admin.block(ctx.fname, user.portrait, day=day, reason=note)
+        if isinstance(success.err, tb.exception.TiebaServerError) and success.err.code == 3150003:
+            success = await ctx.admin.block(ctx.fname, user.portrait, day=10, reason=note)
+        if success:
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
     @check_and_log(need_permission=2, need_arg_num=1)
@@ -452,33 +429,6 @@ class Listener(object):
 
         if await ctx.admin.unblock(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
-
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_drop(self, ctx: Context) -> None:
-        """
-        drop指令
-        删帖并封10天
-        """
-
-        await self.__cmd_drop(ctx, 10)
-
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_drop3(self, ctx: Context) -> None:
-        """
-        drop3指令
-        删帖并封3天
-        """
-
-        await self.__cmd_drop(ctx, 3)
-
-    @check_and_log(need_permission=2, need_arg_num=0)
-    async def cmd_drop1(self, ctx: Context) -> None:
-        """
-        drop1指令
-        删帖并封1天
-        """
-
-        await self.__cmd_drop(ctx, 1)
 
     async def __cmd_drop(self, ctx: Context, day: int = 0) -> None:
         """
@@ -500,7 +450,19 @@ class Listener(object):
         await ctx.admin.del_post(ctx.parent.fid, ctx.parent.tid, ctx.parent.pid)
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
         if day:
-            await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=day, reason=note)
+            ret = await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=day, reason=note)
+            if isinstance(ret.err, tb.exception.TiebaServerError) and ret.err.code == 3150003:
+                await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=10, reason=note)
+
+    @check_and_log(need_permission=2, need_arg_num=0)
+    async def cmd_drop(self, ctx: Context) -> None:
+        """
+        dropx指令
+        删帖并封x天
+        """
+
+        day = int(d) if (d := ctx.cmd_type.removeprefix('drop')) else 10
+        await self.__cmd_drop(ctx, day)
 
     @check_and_log(need_permission=1, need_arg_num=0)
     async def cmd_recommend(self, ctx: Context) -> None:
@@ -613,10 +575,10 @@ class Listener(object):
     async def cmd_exdrop(self, ctx: Context) -> None:
         """
         exdrop指令
-        删帖并将发帖人加入脚本黑名单+封禁十天
+        删帖并将发帖人加入脚本黑名单+封禁90天
         """
 
-        await self.__cmd_drop(ctx, 10)
+        await self.__cmd_drop(ctx, 90)
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
 
@@ -629,7 +591,7 @@ class Listener(object):
         删帖 清空发帖人主页显示的在当前吧的所有主题帖 加入脚本黑名单+封禁十天
         """
 
-        await self.__cmd_drop(ctx, 10)
+        await self.__cmd_drop(ctx, 90)
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
         user_id = ctx.parent.author_id
@@ -699,9 +661,9 @@ class Listener(object):
 
         for img in imgs:
             image = await self.listener.get_image(img.src)
-            if image is None:
+            if image.err:
                 continue
-            img_hash = tbr.imgproc.compute_imghash(image)
+            img_hash = tbr.imgproc.compute_imghash(image.img)
             if img_hash == 4412820541203793671:
                 continue
 
@@ -725,9 +687,9 @@ class Listener(object):
 
         for img in imgs:
             image = await self.listener.get_image(img.src)
-            if image is None:
+            if image.err:
                 continue
-            img_hash = tbr.imgproc.compute_imghash(image)
+            img_hash = tbr.imgproc.compute_imghash(image.img)
 
             await ctx.admin_db.del_imghash(img_hash)
 
