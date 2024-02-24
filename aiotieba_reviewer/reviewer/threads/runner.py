@@ -1,7 +1,7 @@
 import asyncio
 from typing import Awaitable, Callable
 
-from aiotieba.logging import get_logger as LOG
+from aiotieba import get_logger as LOG
 
 from ... import executor
 from ...perf_stat import aperf_stat

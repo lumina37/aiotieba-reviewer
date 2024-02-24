@@ -17,7 +17,7 @@ def _user_checker(func):
         db = await get_db()
         permission = await db.get_user_id(obj.user.user_id)
         if permission <= -5:
-            return Punish(obj, Ops.DELETE, 10, "黑名单")
+            return Punish(obj, Ops.DELETE, 90, "黑名单")
         if permission >= 1:
             return Punish(obj, Ops.NORMAL)
         return await func(obj)

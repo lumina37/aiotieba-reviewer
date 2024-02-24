@@ -3,7 +3,7 @@ import contextlib
 from typing import Generator, List, NoReturn, Optional
 
 from aiotieba.enums import PostSortType
-from aiotieba.logging import get_logger as LOG
+from aiotieba import get_logger as LOG
 
 from .. import client, executor
 from ..client import get_client
