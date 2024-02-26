@@ -413,8 +413,12 @@ class Listener(object):
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
         success = await ctx.admin.block(ctx.fname, user.portrait, day=day, reason=note)
-        if isinstance(success.err, tb.exception.TiebaServerError) and success.err.code == 3150003:
-            success = await ctx.admin.block(ctx.fname, user.portrait, day=10, reason=note)
+        if isinstance(success.err, tb.exception.TiebaServerError):
+            if success.err.code == 3150003:
+                success = await ctx.admin.block(ctx.fname, user.portrait, day=10, reason=note)
+            elif success.err.code == 1211068:
+                await ctx.admin.unblock(ctx.fname, user.user_id)
+                success = await ctx.admin.block(ctx.fname, user.portrait, day=10, reason=note)
         if success:
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 

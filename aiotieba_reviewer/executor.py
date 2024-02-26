@@ -1,6 +1,7 @@
 from typing import Awaitable, Callable, Optional
 
-from aiotieba.logging import get_logger as LOG
+import aiotieba as tb
+from aiotieba import get_logger as LOG
 
 from .client import get_client, get_fname
 from .enums import Ops
@@ -12,7 +13,13 @@ TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
 async def default_punish_executor(punish: Punish) -> Optional[Punish]:
     if day := punish.day:
         client = await get_client()
-        await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
+        ret = await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
+        if isinstance(ret.err, tb.exception.TiebaServerError):
+            if ret.err.code == 1211068:
+                await client.unblock(get_fname(), punish.obj.user.user_id)
+                await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
+            elif ret.err.code == 3150003:
+                await client.block(get_fname(), punish.obj.user.portrait, day=10, reason=punish.note)
 
     op = punish.op
     if op == Ops.NORMAL:
