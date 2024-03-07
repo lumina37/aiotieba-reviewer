@@ -98,7 +98,7 @@ class SQLiteDB(object):
             (`id` INTEGER PRIMARY KEY, `tag` INTEGER NOT NULL, `record_time` INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP)"
         )
 
-    @handle_exception(bool, ok_log_level=logging.INFO)
+    @handle_exception(bool)
     def add_id(self, id_: int, *, tag: int = 0) -> bool:
         """
         将id添加到表id_{fname}
