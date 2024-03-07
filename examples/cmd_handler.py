@@ -351,7 +351,7 @@ class Listener(object):
 
         return success
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_delete(self, ctx: Context) -> None:
         """
         delete指令
@@ -360,7 +360,7 @@ class Listener(object):
 
         await self.__cmd_drop(ctx)
 
-    @check_and_log(need_permission=2, need_arg_num=1)
+    @check_and_log(need_permission=20, need_arg_num=1)
     async def cmd_recover(self, ctx: Context) -> None:
         """
         recover指令
@@ -381,7 +381,7 @@ class Listener(object):
         if success:
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_hide(self, ctx: Context) -> None:
         """
         hide指令
@@ -391,7 +391,7 @@ class Listener(object):
         if await ctx.admin.hide_thread(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_unhide(self, ctx: Context) -> None:
         """
         unhide指令
@@ -401,7 +401,7 @@ class Listener(object):
         if await ctx.admin.unhide_thread(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=1)
+    @check_and_log(need_permission=20, need_arg_num=1)
     async def cmd_block(self, ctx: Context) -> None:
         """
         blockx指令
@@ -422,7 +422,7 @@ class Listener(object):
         if success:
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=1)
+    @check_and_log(need_permission=20, need_arg_num=1)
     async def cmd_unblock(self, ctx: Context) -> None:
         """
         unblock指令
@@ -458,7 +458,7 @@ class Listener(object):
             if isinstance(ret.err, tb.exception.TiebaServerError) and ret.err.code == 3150003:
                 await ctx.admin.block(ctx.parent.fid, ctx.parent.author_id, day=10, reason=note)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_drop(self, ctx: Context) -> None:
         """
         dropx指令
@@ -468,7 +468,7 @@ class Listener(object):
         day = int(d) if (d := ctx.cmd_type.removeprefix('drop')) else 10
         await self.__cmd_drop(ctx, day)
 
-    @check_and_log(need_permission=1, need_arg_num=0)
+    @check_and_log(need_permission=10, need_arg_num=0)
     async def cmd_recommend(self, ctx: Context) -> None:
         """
         recommend指令
@@ -478,7 +478,7 @@ class Listener(object):
         if await ctx.admin.recommend(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=1)
+    @check_and_log(need_permission=20, need_arg_num=1)
     async def cmd_move(self, ctx: Context) -> None:
         """
         move指令
@@ -497,7 +497,7 @@ class Listener(object):
         if await ctx.admin.move(ctx.fname, ctx.tid, to_tab_id=to_tab_id, from_tab_id=from_tab_id):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_good(self, ctx: Context) -> None:
         """
         good指令
@@ -509,7 +509,7 @@ class Listener(object):
         if await ctx.admin.good(ctx.fname, ctx.tid, cname=cname):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=2, need_arg_num=0)
+    @check_and_log(need_permission=20, need_arg_num=0)
     async def cmd_ungood(self, ctx: Context) -> None:
         """
         ungood指令
@@ -519,7 +519,7 @@ class Listener(object):
         if await ctx.admin.ungood(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=0)
+    @check_and_log(need_permission=40, need_arg_num=0)
     async def cmd_top(self, ctx: Context) -> None:
         """
         top指令
@@ -529,7 +529,7 @@ class Listener(object):
         if await ctx.admin.top(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=0)
+    @check_and_log(need_permission=40, need_arg_num=0)
     async def cmd_untop(self, ctx: Context) -> None:
         """
         untop指令
@@ -539,7 +539,7 @@ class Listener(object):
         if await ctx.admin.untop(ctx.fname, ctx.tid):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=1)
+    @check_and_log(need_permission=40, need_arg_num=1)
     async def cmd_black(self, ctx: Context) -> None:
         """
         black指令
@@ -548,10 +548,10 @@ class Listener(object):
 
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
-        if await self.__cmd_set(ctx, -5, note):
+        if await self.__cmd_set(ctx, -50, note):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=3, need_arg_num=1)
+    @check_and_log(need_permission=30, need_arg_num=1)
     async def cmd_white(self, ctx: Context) -> None:
         """
         white指令
@@ -560,10 +560,10 @@ class Listener(object):
 
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
-        if await self.__cmd_set(ctx, 1, note):
+        if await self.__cmd_set(ctx, 10, note):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=3, need_arg_num=1)
+    @check_and_log(need_permission=30, need_arg_num=1)
     async def cmd_reset(self, ctx: Context) -> None:
         """
         reset指令
@@ -575,7 +575,7 @@ class Listener(object):
         if await self.__cmd_set(ctx, 0, note):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=0)
+    @check_and_log(need_permission=40, need_arg_num=0)
     async def cmd_exdrop(self, ctx: Context) -> None:
         """
         exdrop指令
@@ -586,9 +586,9 @@ class Listener(object):
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
 
-        await self.__cmd_set(ctx, -5, note, user_id=ctx.parent.author_id)
+        await self.__cmd_set(ctx, -50, note, user_id=ctx.parent.author_id)
 
-    @check_and_log(need_permission=5, need_arg_num=0)
+    @check_and_log(need_permission=50, need_arg_num=0)
     async def cmd_avada_kedavra(self, ctx: Context) -> None:
         """
         索命咒
@@ -599,7 +599,7 @@ class Listener(object):
 
         note = ctx.args[0] if len(ctx.args) > 0 else ctx.note
         user_id = ctx.parent.author_id
-        await self.__cmd_set(ctx, -5, note, user_id=user_id)
+        await self.__cmd_set(ctx, -50, note, user_id=user_id)
 
         dthreads = []
         for pn in range(1, 0xFFFF):
@@ -613,7 +613,7 @@ class Listener(object):
         for thread in dthreads:
             await ctx.admin.del_post(thread.fid, thread.tid, thread.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=2)
+    @check_and_log(need_permission=40, need_arg_num=2)
     async def cmd_set(self, ctx: Context) -> None:
         """
         set指令
@@ -644,7 +644,7 @@ class Listener(object):
         if await ctx.speaker.send_msg(ctx.user.user_id, msg_content):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=2)
+    @check_and_log(need_permission=40, need_arg_num=2)
     async def cmd_img_set(self, ctx: Context) -> None:
         """
         img_set指令
@@ -675,7 +675,7 @@ class Listener(object):
 
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=3, need_arg_num=0)
+    @check_and_log(need_permission=30, need_arg_num=0)
     async def cmd_img_reset(self, ctx: Context) -> None:
         """
         img_reset指令
@@ -699,7 +699,7 @@ class Listener(object):
 
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=1, need_arg_num=0)
+    @check_and_log(need_permission=10, need_arg_num=0)
     async def cmd_recom_status(self, ctx: Context) -> None:
         """
         recom_status指令
@@ -716,7 +716,7 @@ class Listener(object):
         if await ctx.speaker.send_msg(ctx.user.user_id, content):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=4, need_arg_num=1)
+    @check_and_log(need_permission=40, need_arg_num=1)
     async def cmd_tb_black(self, ctx: Context) -> None:
         """
         tb_black指令
@@ -728,7 +728,7 @@ class Listener(object):
         if await ctx.admin.add_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=3, need_arg_num=1)
+    @check_and_log(need_permission=30, need_arg_num=1)
     async def cmd_tb_reset(self, ctx: Context) -> None:
         """
         tb_reset指令
@@ -740,7 +740,7 @@ class Listener(object):
         if await ctx.admin.del_bawu_blacklist(ctx.fname, user.user_id):
             await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=1, need_arg_num=0)
+    @check_and_log(need_permission=10, need_arg_num=0)
     async def cmd_ping(self, ctx: Context) -> None:
         """
         ping指令
@@ -749,7 +749,7 @@ class Listener(object):
 
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=129, need_arg_num=65536)
+    @check_and_log(need_permission=1029, need_arg_num=65536)
     async def cmd_default(self, _: Context) -> None:
         """
         default指令
