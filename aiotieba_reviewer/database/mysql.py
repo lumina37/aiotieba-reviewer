@@ -1,43 +1,73 @@
 import datetime
+import logging
 import ssl
-from typing import Any, Callable, Final, List, Tuple
+from typing import Any, Callable, Final, List, Optional, Tuple
 
 import asyncmy
-from aiotieba import get_logger as LOG
+from aiotieba import get_logger
 
 from ..config import DB_CONFIG
 
 
-def exec_handler_MySQL(create_table_func: Callable, default_ret: Any):
+def _handle_exception(
+    create_table_func: Callable[["MySQLDB"], None],
+    null_factory: Callable[[], Any],
+    ok_log_level: int = logging.NOTSET,
+    err_log_level: int = logging.WARNING,
+):
     """
-    处理MySQL异常
+    处理MySQL操作抛出的异常 只能用于装饰类成员函数
 
     Args:
-        create_table_func (Callable): 在无法连接数据库(2003)或表不存在时(1146)执行自动建表
-        default_ret (Any): 出现错误时的默认返回值
+        create_table_func (Callable[[MySQLDB], None]): 在无法连接数据库(2003)或表不存在时(1146)执行自动建表
+        null_factory (Callable[[], Any]): 空构造工厂 用于返回一个默认值
+        ok_log_level (int, optional): 正常日志等级. Defaults to logging.NOTSET.
+        err_log_level (int, optional): 异常日志等级. Defaults to logging.WARNING.
     """
 
-    def decorator(func):
-        async def wrapper(self: "MySQLDB", *args, **kwargs):
+    def wrapper(func):
+        async def awrapper(self: "MySQLDB", *args, **kwargs):
+            def _log(log_level: int, err: Optional[Exception] = None) -> None:
+                logger = get_logger()
+                if logger.isEnabledFor(err_log_level):
+                    if err is None:
+                        err = "Suceeded"
+                    log_str = f"{err}. fname={self.fname} args={args} kwargs={kwargs}"
+                    record = logger.makeRecord(logger.name, log_level, None, 0, log_str, None, None, func.__name__)
+                    logger.handle(record)
+
             try:
-                return await func(self, *args, **kwargs)
-            except asyncmy.errors.Error as err:
-                try:
-                    code = err.args[0]
-                    if code in [2003, 1049]:
-                        LOG().warning("无法连接数据库 将尝试自动建库")
-                        await self.create_database()
-                        await create_table_func(self)
-                    elif code == 1146:
-                        LOG().warning("表不存在 将尝试自动建表")
-                        await create_table_func(self)
-                except Exception:
-                    pass
-            return default_ret
+                ret = await func(self, *args, **kwargs)
 
-        return wrapper
+                if ok_log_level:
+                    _log(ok_log_level)
 
-    return decorator
+            except Exception as err:
+                _log(err_log_level, err)
+
+                if isinstance(err, asyncmy.errors.Error):
+                    try:
+                        code = err.args[0]
+                        logger = get_logger()
+                        if code in [2003, 1049]:
+                            logger.warning("无法连接数据库 将尝试自动建库")
+                            await self.create_database()
+                            await create_table_func(self)
+                        elif code == 1146:
+                            logger.warning("表不存在 将尝试自动建表")
+                            await create_table_func(self)
+                    except Exception:
+                        pass
+
+                ret = null_factory()
+                return ret
+
+            else:
+                return ret
+
+        return awrapper
+
+    return wrapper
 
 
 class MySQLDB(object):
@@ -127,13 +157,14 @@ class MySQLDB(object):
             await conn.ensure_closed()
 
         except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. 请检查配置文件中的`Database`字段是否填写正确")
+            get_logger().warning(f"{err}. 请检查配置文件中的`Database`字段是否填写正确")
             return False
 
-        LOG().info(f"成功创建并初始化数据库. db_name={db_name}")
+        get_logger().info(f"成功创建并初始化数据库. db_name={db_name}")
         return True
 
-    async def _create_table_user_id(self) -> None:
+    @_handle_exception(lambda _: None, bool, ok_log_level=logging.INFO)
+    async def create_table_user_id(self) -> bool:
         """
         创建表user_id_{fname}
         """
@@ -145,9 +176,10 @@ class MySQLDB(object):
                     (`user_id` BIGINT PRIMARY KEY, `permission` TINYINT NOT NULL DEFAULT 0, `note` VARCHAR(64) NOT NULL DEFAULT '', `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
                     INDEX `permission`(permission), INDEX `record_time`(record_time))"
                 )
-                LOG().info(f"成功创建表user_id_{self.fname}")
 
-    @exec_handler_MySQL(_create_table_user_id, False)
+        return True
+
+    @_handle_exception(create_table_user_id, bool, ok_log_level=logging.INFO)
     async def add_user_id(self, user_id: int, /, permission: int = 0, *, note: str = '') -> bool:
         """
         将user_id添加到表user_id_{fname}
@@ -162,23 +194,17 @@ class MySQLDB(object):
         """
 
         if not user_id:
-            return False
+            raise ValueError("user_id为空")
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(
-                        f"REPLACE INTO `user_id_{self.fname}` VALUES ({user_id},{permission},'{note}',DEFAULT)"
-                    )
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    f"REPLACE INTO `user_id_{self.fname}` VALUES ({user_id},{permission},'{note}',DEFAULT)"
+                )
 
-                    LOG().info(f"Succeeded. forum={self.fname} user_id={user_id} permission={permission}")
-                    return True
+        return True
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} user_id={user_id}")
-            raise
-
-    @exec_handler_MySQL(_create_table_user_id, False)
+    @_handle_exception(create_table_user_id, bool, ok_log_level=logging.INFO)
     async def del_user_id(self, user_id: int) -> bool:
         """
         从表user_id_{fname}中删除user_id
@@ -190,19 +216,13 @@ class MySQLDB(object):
             bool: True成功 False失败
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(f"DELETE FROM `user_id_{self.fname}` WHERE `user_id`={user_id}")
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(f"DELETE FROM `user_id_{self.fname}` WHERE `user_id`={user_id}")
 
-                    LOG().info(f"Succeeded. forum={self.fname} user_id={user_id}")
-                    return True
+        return True
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} user_id={user_id}")
-            raise
-
-    @exec_handler_MySQL(_create_table_user_id, 0)
+    @_handle_exception(create_table_user_id, int)
     async def get_user_id(self, user_id: int) -> int:
         """
         获取表user_id_{fname}中user_id的权限级别
@@ -214,20 +234,20 @@ class MySQLDB(object):
             int: 权限级别
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(f"SELECT `permission` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}")
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(f"SELECT `permission` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}")
 
-                    if res_tuple := await cursor.fetchone():
-                        return res_tuple[0]
-                    return 0
+                if res_tuple := await cursor.fetchone():
+                    return res_tuple[0]
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} user_id={user_id}")
-            raise
+        return 0
 
-    @exec_handler_MySQL(_create_table_user_id, (0, '', datetime.datetime(1970, 1, 1)))
+    @staticmethod
+    def _default_user_id_full() -> Tuple[int, str, datetime.datetime]:
+        return (0, '', datetime.datetime(1970, 1, 1))
+
+    @_handle_exception(create_table_user_id, _default_user_id_full)
     async def get_user_id_full(self, user_id: int) -> Tuple[int, str, datetime.datetime]:
         """
         获取表user_id_{fname}中user_id的完整信息
@@ -239,21 +259,17 @@ class MySQLDB(object):
             tuple[int, str, datetime.datetime]: 权限级别, 备注, 记录时间
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(
-                        f"SELECT `permission`,`note`,`record_time` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}"
-                    )
-                    if res_tuple := await cursor.fetchone():
-                        return res_tuple
-                    return 0, '', datetime.datetime(1970, 1, 1)
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    f"SELECT `permission`,`note`,`record_time` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}"
+                )
+                if res_tuple := await cursor.fetchone():
+                    return res_tuple
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} user_id={user_id}")
-            raise
+        return self._default_user_id_full()
 
-    @exec_handler_MySQL(_create_table_user_id, [])
+    @_handle_exception(create_table_user_id, list)
     async def get_user_id_list(
         self, lower_permission: int = 0, upper_permission: int = 5, *, limit: int = 1, offset: int = 0
     ) -> List[int]:
@@ -270,22 +286,19 @@ class MySQLDB(object):
             list[int]: user_id列表
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(
-                        f"SELECT `user_id` FROM `user_id_{self.fname}` WHERE `permission`>={lower_permission} AND `permission`<={upper_permission} ORDER BY `record_time` DESC LIMIT {limit} OFFSET {offset}"
-                    )
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    f"SELECT `user_id` FROM `user_id_{self.fname}` WHERE `permission`>={lower_permission} AND `permission`<={upper_permission} ORDER BY `record_time` DESC LIMIT {limit} OFFSET {offset}"
+                )
 
-                    res_tuples = await cursor.fetchall()
-                    res_list = [res_tuple[0] for res_tuple in res_tuples]
-                    return res_list
+                res_tuples = await cursor.fetchall()
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname}")
-            raise
+        res_list = [res_tuple[0] for res_tuple in res_tuples]
+        return res_list
 
-    async def _create_table_imghash(self) -> None:
+    @_handle_exception(lambda _: None, bool, ok_log_level=logging.INFO)
+    async def create_table_imghash(self) -> bool:
         """
         创建表imghash_{fname}
         """
@@ -297,9 +310,10 @@ class MySQLDB(object):
                     (`img_hash` BIGINT UNSIGNED PRIMARY KEY, `raw_hash` CHAR(40) UNIQUE NOT NULL, `permission` TINYINT NOT NULL DEFAULT 0, `note` VARCHAR(64) NOT NULL DEFAULT '', `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
                     INDEX `permission`(permission), INDEX `record_time`(record_time))"
                 )
-                LOG().info(f"成功创建表imghash_{self.fname}")
 
-    @exec_handler_MySQL(_create_table_imghash, False)
+        return True
+
+    @_handle_exception(create_table_imghash, bool, ok_log_level=logging.INFO)
     async def add_imghash(self, img_hash: int, raw_hash: str, /, permission: int = 0, *, note: str = '') -> bool:
         """
         将img_hash添加到表imghash_{fname}
@@ -314,21 +328,15 @@ class MySQLDB(object):
             bool: True成功 False失败
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(
-                        f"REPLACE INTO `imghash_{self.fname}` VALUES ({img_hash},'{raw_hash}',{permission},'{note}',DEFAULT)"
-                    )
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    f"REPLACE INTO `imghash_{self.fname}` VALUES ({img_hash},'{raw_hash}',{permission},'{note}',DEFAULT)"
+                )
 
-                    LOG().info(f"Succeeded. forum={self.fname} img_hash={img_hash} permission={permission}")
-                    return True
+        return True
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} img_hash={img_hash}")
-            raise
-
-    @exec_handler_MySQL(_create_table_imghash, False)
+    @_handle_exception(create_table_imghash, bool, ok_log_level=logging.INFO)
     async def del_imghash(self, img_hash: int, *, hamming_dist: int = 0) -> bool:
         """
         从表imghash_{fname}中删除img_hash
@@ -341,24 +349,18 @@ class MySQLDB(object):
             bool: True成功 False失败
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    if hamming_dist > 0:
-                        await cursor.execute(
-                            f"DELETE FROM `imghash_{self.fname}` WHERE BIT_COUNT(`img_hash`^{img_hash})<={hamming_dist}"
-                        )
-                    else:
-                        await cursor.execute(f"DELETE FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                if hamming_dist > 0:
+                    await cursor.execute(
+                        f"DELETE FROM `imghash_{self.fname}` WHERE BIT_COUNT(`img_hash`^{img_hash})<={hamming_dist}"
+                    )
+                else:
+                    await cursor.execute(f"DELETE FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
 
-                    LOG().info(f"Succeeded. forum={self.fname} img_hash={img_hash}")
-                    return True
+        return True
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} img_hash={img_hash}")
-            raise
-
-    @exec_handler_MySQL(_create_table_imghash, 0)
+    @_handle_exception(create_table_imghash, int)
     async def get_imghash(self, img_hash: int, *, hamming_dist: int = 0) -> int:
         """
         获取表imghash_{fname}中img_hash的封锁级别
@@ -371,27 +373,24 @@ class MySQLDB(object):
             int: 封锁级别
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    if hamming_dist > 0:
-                        await cursor.execute(
-                            f"SELECT `permission`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
-                        )
-                    else:
-                        await cursor.execute(
-                            f"SELECT `permission` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}"
-                        )
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                if hamming_dist > 0:
+                    await cursor.execute(
+                        f"SELECT `permission`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
+                    )
+                else:
+                    await cursor.execute(f"SELECT `permission` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
 
-                    if res_tuple := await cursor.fetchone():
-                        return res_tuple[0]
-                    return 0
+                if res_tuple := await cursor.fetchone():
+                    return res_tuple[0]
+        return 0
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} img_hash={img_hash}")
-            raise
+    @staticmethod
+    def _default_imghash_full() -> Tuple[int, str]:
+        return (0, '')
 
-    @exec_handler_MySQL(_create_table_imghash, (0, ''))
+    @_handle_exception(create_table_imghash, _default_imghash_full)
     async def get_imghash_full(self, img_hash: int, *, hamming_dist: int = 0) -> Tuple[int, str]:
         """
         获取表imghash_{fname}中img_hash的完整信息
@@ -404,22 +403,18 @@ class MySQLDB(object):
             tuple[int, str]: 封锁级别, 备注
         """
 
-        try:
-            async with self._pool.acquire() as conn:
-                async with conn.cursor() as cursor:
-                    if hamming_dist > 0:
-                        await cursor.execute(
-                            f"SELECT `permission`,`note`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
-                        )
-                    else:
-                        await cursor.execute(
-                            f"SELECT `permission`,`note` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}"
-                        )
+        async with self._pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                if hamming_dist > 0:
+                    await cursor.execute(
+                        f"SELECT `permission`,`note`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
+                    )
+                else:
+                    await cursor.execute(
+                        f"SELECT `permission`,`note` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}"
+                    )
 
-                    if res_tuple := await cursor.fetchone():
-                        return res_tuple[:2]
-                    return 0, ''
+                if res_tuple := await cursor.fetchone():
+                    return res_tuple[:2]
 
-        except asyncmy.errors.Error as err:
-            LOG().warning(f"{err}. forum={self.fname} img_hash={img_hash}")
-            raise
+        return self._default_imghash_full()
