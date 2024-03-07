@@ -16,9 +16,9 @@ def _user_checker(func):
     async def _(obj: TypeObj) -> Optional[Punish]:
         db = await get_db()
         permission = await db.get_user_id(obj.user.user_id)
-        if permission <= -5:
+        if permission <= -50:
             return Punish(obj, Ops.DELETE, 90, "黑名单")
-        if permission >= 1:
+        if permission >= 10:
             return Punish(obj, Ops.NORMAL)
         return await func(obj)
 
