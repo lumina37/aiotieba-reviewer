@@ -173,19 +173,21 @@ class MySQLDB(object):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "CREATE TABLE IF NOT EXISTS `forum_score` \
-                    (`fid` INT PRIMARY KEY, `post` TINYINT NOT NULL DEFAULT 0, `follow` TINYINT NOT NULL DEFAULT 0, `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+                    (`fid` INT PRIMARY KEY, `fname` VARCHAR(36) UNIQUE NOT NULL, \
+                    `post` TINYINT NOT NULL DEFAULT 0, `follow` TINYINT NOT NULL DEFAULT 0, `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
                     INDEX `post`(post), INDEX `follow`(follow), INDEX `record_time`(record_time))"
                 )
 
         return True
 
     @_handle_exception(create_table_forum_score, bool, ok_log_level=logging.INFO)
-    async def add_forum_score(self, fid: int, /, post: int = 0, follow: int = 0) -> bool:
+    async def add_forum_score(self, fid: int, fname: str = '', /, post: int = 0, follow: int = 0) -> bool:
         """
         将fid添加到表forum_score
 
         Args:
-            fid (int): forum_id
+            fid (int): 吧id
+            fname (str): 吧名. Defaults to ''.
             post (int, optional): 发帖评分. Defaults to 0.
             follow (int, optional): 关注评分. Defaults to 0.
 
@@ -198,7 +200,7 @@ class MySQLDB(object):
 
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute(f"REPLACE INTO `forum_score` VALUES ({fid},{post},{follow},DEFAULT)")
+                await cursor.execute(f"REPLACE INTO `forum_score` VALUES ({fid},'{fname}',{post},{follow},DEFAULT)")
 
         return True
 
@@ -208,7 +210,7 @@ class MySQLDB(object):
         从表forum_score中删除fid
 
         Args:
-            fid (int): forum_id
+            fid (int): 吧id
 
         Returns:
             bool: True成功 False失败
@@ -230,7 +232,7 @@ class MySQLDB(object):
         获取表forum_score中fid的评分
 
         Args:
-            fid (int): forum_id
+            fid (int): 吧id
 
         Returns:
             tuple[int, int]: 发帖评分, 关注评分
