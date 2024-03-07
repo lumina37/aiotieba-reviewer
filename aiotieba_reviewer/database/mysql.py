@@ -173,20 +173,21 @@ class MySQLDB(object):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "CREATE TABLE IF NOT EXISTS `forum_score` \
-                    (`fid` INT PRIMARY KEY, `score` TINYINT NOT NULL DEFAULT 0, `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
-                    INDEX `score`(score), INDEX `record_time`(record_time))"
+                    (`fid` INT PRIMARY KEY, `post` TINYINT NOT NULL DEFAULT 0, `follow` TINYINT NOT NULL DEFAULT 0, `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+                    INDEX `post`(post), INDEX `follow`(follow), INDEX `record_time`(record_time))"
                 )
 
         return True
 
     @_handle_exception(create_table_forum_score, bool, ok_log_level=logging.INFO)
-    async def add_forum_score(self, fid: int, /, score: int = 0) -> bool:
+    async def add_forum_score(self, fid: int, /, post: int = 0, follow: int = 0) -> bool:
         """
         将fid添加到表forum_score
 
         Args:
             fid (int): forum_id
-            score (int, optional): 评分. Defaults to 0.
+            post (int, optional): 发帖评分. Defaults to 0.
+            follow (int, optional): 关注评分. Defaults to 0.
 
         Returns:
             bool: True成功 False失败
@@ -197,7 +198,7 @@ class MySQLDB(object):
 
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute(f"REPLACE INTO `forum_score` VALUES ({fid},{score},DEFAULT)")
+                await cursor.execute(f"REPLACE INTO `forum_score` VALUES ({fid},{post},{follow},DEFAULT)")
 
         return True
 
@@ -219,8 +220,12 @@ class MySQLDB(object):
 
         return True
 
-    @_handle_exception(create_table_forum_score, int)
-    async def get_forum_score(self, fid: int) -> int:
+    @staticmethod
+    def _default_forum_score() -> Tuple[int, int]:
+        return (0, 0)
+
+    @_handle_exception(create_table_forum_score, _default_forum_score)
+    async def get_forum_score(self, fid: int) -> Tuple[int, int]:
         """
         获取表forum_score中fid的评分
 
@@ -228,69 +233,17 @@ class MySQLDB(object):
             fid (int): forum_id
 
         Returns:
-            int: 评分
+            tuple[int, int]: 发帖评分, 关注评分
         """
 
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute(f"SELECT `permission` FROM `forum_score` WHERE `fid`={fid}")
+                await cursor.execute(f"SELECT `post`,`follow` FROM `forum_score` WHERE `fid`={fid}")
 
                 if res_tuple := await cursor.fetchone():
                     return res_tuple[0]
 
         return 0
-
-    @staticmethod
-    def _default_forum_score_full() -> Tuple[int, datetime.datetime]:
-        return (0, datetime.datetime(1970, 1, 1))
-
-    @_handle_exception(create_table_forum_score, _default_forum_score_full)
-    async def get_forum_score_full(self, fid: int) -> Tuple[int, datetime.datetime]:
-        """
-        获取表forum_score中fid的完整信息
-
-        Args:
-            fid (int): forum_id
-
-        Returns:
-            tuple[int, datetime.datetime]: 评分, 记录时间
-        """
-
-        async with self._pool.acquire() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute(f"SELECT `score`,`record_time` FROM `forum_score` WHERE `fid`={fid}")
-                if res_tuple := await cursor.fetchone():
-                    return res_tuple
-
-        return self._default_forum_score_full()
-
-    @_handle_exception(create_table_forum_score, list)
-    async def get_forum_score_list(
-        self, lower_score: int = 0, upper_score: int = 50, *, limit: int = 1, offset: int = 0
-    ) -> List[int]:
-        """
-        获取表forum_score中fid的列表
-
-        Args:
-            lower_score (int, optional): 获取所有评分大于等于lower_score的fid. Defaults to 0.
-            upper_score (int, optional): 获取所有评分小于等于lower_score的fid. Defaults to 50.
-            limit (int, optional): 返回数量限制. Defaults to 1.
-            offset (int, optional): 偏移. Defaults to 0.
-
-        Returns:
-            list[int]: fid列表
-        """
-
-        async with self._pool.acquire() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute(
-                    f"SELECT `fid` FROM `forum_score` WHERE `permission`>={lower_score} AND `permission`<={upper_score} ORDER BY `record_time` DESC LIMIT {limit} OFFSET {offset}"
-                )
-
-                res_tuples = await cursor.fetchall()
-
-        res_list = [res_tuple[0] for res_tuple in res_tuples]
-        return res_list
 
     @_handle_exception(lambda _: None, bool, ok_log_level=logging.INFO)
     async def create_table_user_id(self) -> bool:
