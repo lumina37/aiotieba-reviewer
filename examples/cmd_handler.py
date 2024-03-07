@@ -699,23 +699,6 @@ class Listener(object):
 
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=10, need_arg_num=0)
-    async def cmd_recom_status(self, ctx: Context) -> None:
-        """
-        recom_status指令
-        获取大吧主推荐功能的月度配额状态
-        """
-
-        if not self.time_recorder.allow_execute():
-            raise ValueError("speaker尚未冷却完毕")
-
-        status = await ctx.admin.get_recom_status(ctx.fname)
-        percent = status.used_recom_num / status.total_recom_num * 100
-        content = f"Used: {status.used_recom_num} / {status.total_recom_num} = {percent:.2f}%"
-
-        if await ctx.speaker.send_msg(ctx.user.user_id, content):
-            await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
-
     @check_and_log(need_permission=40, need_arg_num=1)
     async def cmd_tb_black(self, ctx: Context) -> None:
         """
