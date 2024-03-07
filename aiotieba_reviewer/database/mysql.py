@@ -241,7 +241,7 @@ class MySQLDB(object):
                 await cursor.execute(f"SELECT `post`,`follow` FROM `forum_score` WHERE `fid`={fid}")
 
                 if res_tuple := await cursor.fetchone():
-                    return res_tuple[0]
+                    return res_tuple[:2]
 
         return 0
 
