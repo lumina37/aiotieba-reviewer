@@ -245,7 +245,7 @@ class MySQLDB(object):
                 if res_tuple := await cursor.fetchone():
                     return res_tuple[:2]
 
-        return 0
+        return self._default_forum_score()
 
     @_handle_exception(lambda _: None, bool, ok_log_level=logging.INFO)
     async def create_table_user_id(self) -> bool:
