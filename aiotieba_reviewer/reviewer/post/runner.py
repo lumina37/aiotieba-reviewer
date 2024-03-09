@@ -23,7 +23,9 @@ async def __default_runner(post: Post) -> Optional[Punish]:
     punish = await comments.runner.runner(post)
     if punish is not None:
         punish.obj = post
-        return punish
+        punish = await executor.punish_executor(punish)
+        if punish is not None:
+            return punish
 
 
 runner: TypePostRunner = __null_runner

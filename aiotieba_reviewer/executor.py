@@ -25,18 +25,17 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
     if op == Ops.NORMAL:
         return
     if op == Ops.DELETE:
-        LOG().info(
-            f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-        )
+        LOG().info(f"Del {punish.obj}. note={punish.note}")
+        op &= ~Ops.DELETE
+        punish.op = op
+        punish.day = 0
         client = await get_client()
         await client.del_post(punish.obj.fid, punish.obj.tid, punish.obj.pid)
-        return
+        return punish
     if op == Ops.PENDING:
         return punish
     if op == Ops.HIDE:
-        LOG().info(
-            f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-        )
+        LOG().info(f"Hide {punish.obj}. note={punish.note}")
         client = await get_client()
         await client.hide_thread(get_fname(), punish.obj.tid)
         return
@@ -59,16 +58,15 @@ async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
     if op == Ops.NORMAL:
         return
     if op == Ops.DELETE:
-        LOG().info(
-            f"Del {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-        )
-        return
+        LOG().info(f"Del {punish.obj}. note={punish.note}")
+        op &= ~Ops.DELETE
+        punish.op = op
+        punish.day = 0
+        return punish
     if op == Ops.PENDING:
         return punish
     if op == Ops.HIDE:
-        LOG().info(
-            f"Hide {punish.obj.__class__.__name__}. tid={punish.obj.tid} pid={punish.obj.pid} text={punish.obj.text} user={punish.obj.user.log_name} note={punish.note}"
-        )
+        LOG().info(f"Hide {punish.obj}. note={punish.note}")
         return
     if op & Ops.PARENT == Ops.PARENT:
         op &= ~Ops.PARENT
