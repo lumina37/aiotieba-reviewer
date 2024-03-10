@@ -1,3 +1,4 @@
+import asyncio
 from typing import Awaitable, Callable, Optional
 
 import aiotieba as tb
@@ -17,6 +18,7 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         if isinstance(ret.err, tb.exception.TiebaServerError):
             if ret.err.code == 1211068:
                 await client.unblock(get_fname(), punish.obj.user.user_id)
+                await asyncio.sleep(1.5)
                 await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
             elif ret.err.code == 3150003:
                 await client.block(get_fname(), punish.obj.user.portrait, day=10, reason=punish.note)
