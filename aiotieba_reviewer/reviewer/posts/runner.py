@@ -17,6 +17,8 @@ async def __null_runner(_):
 
 async def __default_runner(thread: Thread) -> Optional[Punish]:
     posts = await producer.producer(thread)
+    for post in posts:
+        post.parent = thread
 
     rethrow_punish = None
 

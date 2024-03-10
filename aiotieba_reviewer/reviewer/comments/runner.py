@@ -16,6 +16,8 @@ async def __null_runner(_):
 
 async def __default_runner(post: Post) -> Optional[Punish]:
     comments = await producer.producer(post)
+    for comment in comments:
+        comment.parent = post
 
     rethrow_punish = None
 
