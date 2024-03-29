@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "aiotieba-reviewer"
 description = "High Flexibility Anti-spam Framework Based on Aiotieba"
@@ -29,6 +25,10 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.packages.find]
 where = ["."]
 
@@ -38,8 +38,8 @@ version = { attr = "aiotieba_reviewer.__version__.__version__" }
 [tool.setuptools.package-data]
 "*" = ["*.pyi"]
 
-[tool.pdm.dev-dependencies]
-doc = ["mkdocs-material"]
+[tool.rye]
+dev-dependencies = ["mkdocs-material"]
 
 [tool.black]
 line-length = 120
