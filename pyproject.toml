@@ -41,14 +41,12 @@ version = { attr = "aiotieba_reviewer.__version__.__version__" }
 [tool.rye]
 dev-dependencies = ["mkdocs-material"]
 
-[tool.black]
-line-length = 120
-skip-string-normalization = true
-target-version = ["py310", "py311", "py312"]
-
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "preserve"
 
 [tool.ruff.lint]
 select = ["W", "E", "F", "I"]
