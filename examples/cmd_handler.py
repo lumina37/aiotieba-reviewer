@@ -3,14 +3,15 @@ import functools
 import itertools
 import re
 import time
-from typing import Protocol, Tuple, Union
+from typing import Protocol
 
 import aiotieba as tb
-import aiotieba_reviewer as tbr
 from aiotieba.api.get_ats import At
 from aiotieba.api.get_comments._classdef import Contents_cp
 from aiotieba.api.get_posts._classdef import Contents_p, Contents_pt
 from aiotieba.logging import get_logger as LOG
+
+import aiotieba_reviewer as tbr
 from aiotieba_reviewer.config import tomllib
 
 tb.logging.enable_filelog()
@@ -21,7 +22,7 @@ with open("cmd_handler.toml", 'rb') as file:
     del LISTEN_CONFIG['Forum']
 
 
-class TimerRecorder(object):
+class TimerRecorder:
     """
     时间记录器
 
@@ -72,10 +73,10 @@ class TypeParent(Protocol):
     def author_id(self) -> int: ...
 
     @property
-    def contents(self) -> Union[Contents_pt, Contents_p, Contents_cp]: ...
+    def contents(self) -> Contents_pt | Contents_p | Contents_cp: ...
 
 
-class Context(object):
+class Context:
     __slots__ = [
         'at',
         'text',
@@ -228,7 +229,7 @@ def check_and_log(need_permission: int = 0, need_arg_num: int = 0):
     return wrapper
 
 
-class Listener(object):
+class Listener:
     __slots__ = [
         'listener',
         'admins',
@@ -262,7 +263,7 @@ class Listener(object):
                 LOG().critical("Unhandled error", exc_info=True)
                 return
 
-    async def get_admin(self, fname: str) -> Tuple[tb.Client, tbr.MySQLDB, tb.Client]:
+    async def get_admin(self, fname: str) -> tuple[tb.Client, tbr.MySQLDB, tb.Client]:
         tup = self.admins.get(fname)
 
         if tup is None:
@@ -732,13 +733,11 @@ class Listener(object):
 
         await ctx.admin.del_post(ctx.fname, ctx.tid, ctx.pid)
 
-    @check_and_log(need_permission=1029, need_arg_num=65536)
+    @check_and_log(need_permission=65535, need_arg_num=65535)
     async def cmd_default(self, _: Context) -> None:
         """
         default指令
         """
-
-        pass
 
 
 if __name__ == '__main__':

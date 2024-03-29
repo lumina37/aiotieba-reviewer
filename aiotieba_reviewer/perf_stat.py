@@ -2,7 +2,7 @@ import time
 from collections import deque
 
 
-class aperf_stat(object):
+class aperf_stat:
     """
     异步函数性能统计工具
 

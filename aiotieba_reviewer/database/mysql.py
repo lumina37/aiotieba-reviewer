@@ -1,7 +1,8 @@
 import datetime
 import logging
 import ssl
-from typing import Any, Callable, Final, List, Optional, Tuple
+from collections.abc import Callable
+from typing import Any, Final
 
 import asyncmy
 from aiotieba import get_logger
@@ -27,7 +28,7 @@ def _handle_exception(
 
     def wrapper(func):
         async def awrapper(self: "MySQLDB", *args, **kwargs):
-            def _log(log_level: int, err: Optional[Exception] = None) -> None:
+            def _log(log_level: int, err: Exception | None = None) -> None:
                 logger = get_logger()
                 if logger.isEnabledFor(err_log_level):
                     if err is None:
@@ -70,7 +71,7 @@ def _handle_exception(
     return wrapper
 
 
-class MySQLDB(object):
+class MySQLDB:
     """
     MySQL交互
 
@@ -223,11 +224,11 @@ class MySQLDB(object):
         return True
 
     @staticmethod
-    def _default_forum_score() -> Tuple[int, int]:
+    def _default_forum_score() -> tuple[int, int]:
         return (0, 0)
 
     @_handle_exception(create_table_forum_score, _default_forum_score)
-    async def get_forum_score(self, fid: int) -> Tuple[int, int]:
+    async def get_forum_score(self, fid: int) -> tuple[int, int]:
         """
         获取表forum_score中fid的评分
 
@@ -328,11 +329,11 @@ class MySQLDB(object):
         return 0
 
     @staticmethod
-    def _default_user_id_full() -> Tuple[int, str, datetime.datetime]:
+    def _default_user_id_full() -> tuple[int, str, datetime.datetime]:
         return (0, '', datetime.datetime(1970, 1, 1))
 
     @_handle_exception(create_table_user_id, _default_user_id_full)
-    async def get_user_id_full(self, user_id: int) -> Tuple[int, str, datetime.datetime]:
+    async def get_user_id_full(self, user_id: int) -> tuple[int, str, datetime.datetime]:
         """
         获取表user_id_{fname}中user_id的完整信息
 
@@ -356,7 +357,7 @@ class MySQLDB(object):
     @_handle_exception(create_table_user_id, list)
     async def get_user_id_list(
         self, lower_permission: int = 0, upper_permission: int = 50, *, limit: int = 1, offset: int = 0
-    ) -> List[int]:
+    ) -> list[int]:
         """
         获取表user_id_{fname}中user_id的列表
 
@@ -471,11 +472,11 @@ class MySQLDB(object):
         return 0
 
     @staticmethod
-    def _default_imghash_full() -> Tuple[int, str]:
+    def _default_imghash_full() -> tuple[int, str]:
         return (0, '')
 
     @_handle_exception(create_table_imghash, _default_imghash_full)
-    async def get_imghash_full(self, img_hash: int, *, hamming_dist: int = 0) -> Tuple[int, str]:
+    async def get_imghash_full(self, img_hash: int, *, hamming_dist: int = 0) -> tuple[int, str]:
         """
         获取表imghash_{fname}中img_hash的完整信息
 

@@ -1,7 +1,8 @@
 import logging
 import sqlite3
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 from aiotieba import get_logger
 
@@ -22,7 +23,7 @@ def handle_exception(
 
     def wrapper(func):
         def inner(self, *args, **kwargs):
-            def _log(log_level: int, err: Optional[Exception] = None) -> None:
+            def _log(log_level: int, err: Exception | None = None) -> None:
                 logger = get_logger()
                 if logger.isEnabledFor(err_log_level):
                     if err is None:
@@ -53,7 +54,7 @@ def handle_exception(
     return wrapper
 
 
-class SQLiteDB(object):
+class SQLiteDB:
     """
     SQLite交互
 
@@ -130,7 +131,7 @@ class SQLiteDB(object):
         return True
 
     @handle_exception(lambda: None)
-    def get_id(self, id_: int) -> Optional[int]:
+    def get_id(self, id_: int) -> int | None:
         """
         获取表id_{fname}中id对应的tag值
 

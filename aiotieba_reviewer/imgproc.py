@@ -1,4 +1,3 @@
-from typing import Tuple
 
 import cv2 as cv
 import numpy as np
@@ -105,7 +104,7 @@ async def get_imghash(image: "np.ndarray", *, hamming_dist: int = 0) -> int:
     return 0
 
 
-async def get_imghash_full(image: "np.ndarray", *, hamming_dist: int = 0) -> Tuple[int, str]:
+async def get_imghash_full(image: "np.ndarray", *, hamming_dist: int = 0) -> tuple[int, str]:
     """
     获取图像的完整信息
 

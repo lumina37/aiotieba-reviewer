@@ -1,14 +1,14 @@
-from typing import Awaitable, Callable, List
+from collections.abc import Awaitable, Callable
 
 from aiotieba.enums import PostSortType
 
 from ...client import get_client
 from ...typing import Post, Thread
 
-TypePostsProducer = Callable[[Thread], Awaitable[List[Post]]]
+TypePostsProducer = Callable[[Thread], Awaitable[list[Post]]]
 
 
-async def __default_producer(thread: Thread) -> List[Post]:
+async def __default_producer(thread: Thread) -> list[Post]:
     client = await get_client()
 
     last_posts = await client.get_posts(

@@ -1,11 +1,11 @@
-from typing import Awaitable, Callable, List, Optional
+from collections.abc import Awaitable, Callable
 
 from ...punish import Punish
 from ...typing import Comment
 
-TypeCommentsFilter = Callable[[List[Comment]], Awaitable[Optional[List[Punish]]]]
+TypeCommentsFilter = Callable[[list[Comment]], Awaitable[list[Punish] | None]]
 
-_filters: List[TypeCommentsFilter] = []
+_filters: list[TypeCommentsFilter] = []
 
 _append_filter_hook = None
 

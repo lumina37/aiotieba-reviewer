@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from aiotieba import get_logger as LOG
 
