@@ -39,6 +39,7 @@ version = { attr = "aiotieba_reviewer.__version__.__version__" }
 "*" = ["*.pyi"]
 
 [tool.rye]
+managed = true
 dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
