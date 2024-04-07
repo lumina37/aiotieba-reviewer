@@ -148,7 +148,7 @@
 + `40` 大吧主 - 可以添加脚本黑名单 贴吧黑名单<br>
 + `30` 高权限吧务 - 可以置顶 撤置顶 解贴吧黑名单 解脚本黑名单<br>
 + `20` 普通吧务 - 可以删 封 解封 加精 撤精 屏蔽 解屏蔽 拒绝申诉<br>
-+ `10` 非吧务的优秀创作者 - 可以使用[`recommend`](#recommend-首页推荐) [`ping`](#ping-可用性测试)指令<br>
++ `10` 非吧务的优秀创作者 - 可以使用[`recommend`](#recommend-首页推荐) [`get`](#get-用户信息) [`ping`](#ping-可用性测试)指令<br>
 + `0` 普通吧友(默认值) 一般不需要特别指定<br>
 + `-10` 不允许使用指令的用户<br>
 + `-20 ~ -40` 可自定义的惩罚标记<br>
@@ -694,6 +694,41 @@ dropx: 对应x天封禁<br>
 ***能使用该指令的最低权限级别***
 
 30 高权限吧务
+
+---
+
+### get 用户信息
+
+```text
+@v_guard get [id]
+```
+
+***功能***
+
+获取贴吧用户的标记信息和个人信息
+
+***举例***
+
+```text
+@v_guard get 李彦宏
+```
+
+若该指令生效，指令管理器后台将会打印一条日志
+
+```
+用户权限级别=0
+备注=
+被记录的时间=1970-01-01 00:00:00
+详细用户信息=UserInfo_pf(user_id=79, portrait='tb.1.8c1d7226.-pTUqhuXLOiqu7xbSIIx-A', user_name='李彦宏', nick_name_new='白皮松林🍁', tieba_uid=10055118, glevel=1, gender=<Gender.MALE: 1>, age=20.4, post_num=126, agree_num=8965, fan_num=12636323, follow_num=92, forum_num=7, sign='', ip='北京', icons=['baiyang'], vimage=VirtualImage_pf(enabled=False, state=''), is_vip=False, is_god=True, is_blocked=False, priv_like=<PrivLike.PUBLIC: 1>, priv_reply=<PrivReply.ALL: 1>)
+```
+
+***参数说明***
+
+`id`: [`用户名`](https://aiotieba.cc/tutorial/start#user_name)或[`portrait`](https://aiotieba.cc/tutorial/start#portrait)或包含[`tieba_uid`](https://aiotieba.cc/tutorial/start#tieba_uid)的字符串或包含[`user_id`](https://aiotieba.cc/tutorial/start#user_id)的字符串
+
+***能使用该指令的最低权限级别***
+
+10 非吧务的优秀创作者
 
 ---
 
