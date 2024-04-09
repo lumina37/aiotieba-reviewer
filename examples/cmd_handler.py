@@ -5,6 +5,7 @@ import functools
 import itertools
 import re
 import time
+from collections.abc import Callable
 from typing import Protocol
 
 import aiotieba as tb
@@ -58,6 +59,15 @@ class AdminManager:
         return admin
 
 
+@dcs.dataclass
+class CmdArgs:
+    cmd: str
+    args: list[str]
+
+
+TypeArgParser = Callable[[str], CmdArgs]
+
+
 class TypeParent(Protocol):
     @property
     def fid(self) -> int: ...
@@ -83,9 +93,9 @@ class Context:
     at: At
     text: str = dcs.field(init=False, repr=False)
     admin: Admin = dcs.field(init=False, repr=False)
-    cmd_type: str = dcs.field(default='', init=False)
-    args: list[str] = dcs.field(default_factory=list, init=False)
+    cmdargs: CmdArgs = dcs.field(init=False)
     parent: TypeParent = dcs.field(default=None, init=False)
+    argparser: TypeArgParser = dcs.field(init=False, repr=False)
     fullinit_success: bool = dcs.field(default=False, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -97,7 +107,7 @@ class Context:
         if len(self.at.text.encode('utf-8')) >= 78:
             await self.async_fullinit()
 
-        self.__parse_args()
+        self.cmdargs = self.argparser(self.text)
 
     async def async_fullinit(self) -> None:
         if self.fullinit_success:
@@ -129,19 +139,8 @@ class Context:
             posts = await self.client.get_posts(self.tid, rn=0)
             self.parent = posts.thread
 
-        self.__parse_args()
+        self.cmdargs = self.argparser(self.text)
         self.fullinit_success = True
-
-    def __parse_args(self) -> None:
-        text = re.sub(r'.*?@.*? ', '', self.text, count=1)
-
-        args = [arg.lstrip(' ') for arg in text.split(' ')]
-        if args:
-            self.cmd_type = args[0]
-            self.args = args[1:]
-        else:
-            self.cmd_type = ''
-            self.args = []
 
     @property
     def fname(self):
@@ -160,6 +159,14 @@ class Context:
         return self.at.user
 
     @property
+    def cmd(self) -> str:
+        return self.cmdargs.cmd
+
+    @property
+    def args(self) -> list[str]:
+        return self.cmdargs.args
+
+    @property
     def client(self) -> tb.Client:
         return self.admin.client
 
@@ -169,7 +176,7 @@ class Context:
 
     @functools.cached_property
     def note(self) -> str:
-        return f"cmd_{self.cmd_type}_by_{self.user.user_id}"
+        return f"cmd_{self.cmd}_by_{self.user.user_id}"
 
 
 def get_num_between_two_signs(s: str, sign: str) -> int:
@@ -315,7 +322,7 @@ class CMD_block(ABCCommand):
     req_perm: int = 20
 
     async def run(self: "ABCCommand", ctx: Context) -> None:
-        day = int(d) if (d := ctx.cmd_type.removeprefix('block')) else 10
+        day = int(d) if (d := ctx.cmd.removeprefix('block')) else 10
         user = await arg2user_info(ctx.client, ctx.args[0])
         reason = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
@@ -343,7 +350,7 @@ class CMD_drop(ABCCommand):
     async def run(self: "ABCCommand", ctx: Context) -> None:
         await ctx.async_fullinit()
 
-        day = int(d) if (d := ctx.cmd_type.removeprefix('drop')) else 10
+        day = int(d) if (d := ctx.cmd.removeprefix('drop')) else 10
         reason = ctx.args[0] if ctx.args else ctx.note
 
         if await block(ctx, ctx.parent.author_id, day, reason):
@@ -588,6 +595,7 @@ def default_last_exec_time() -> int:
 class Executer:
     listener: tb.Client = dcs.field(init=False)
     admin_manager: AdminManager = dcs.field(init=False)
+    argparser: TypeArgParser = dcs.field(init=False)
     last_exec_time: int = dcs.field(default_factory=default_last_exec_time)
 
     def __post_init__(self) -> None:
@@ -596,6 +604,25 @@ class Executer:
 
     async def __aenter__(self) -> "Executer":
         await self.listener.__aenter__()
+
+        listener_userinfo = await self.listener.get_self_info(tb.ReqUInfo.USER_NAME)
+        subexp = re.compile(f".*?@{listener_userinfo.user_name}")
+
+        def argparser(text: str) -> CmdArgs:
+            text = subexp.sub('', text, count=1)
+
+            args = [arg.lstrip(' ') for arg in text.split(' ') if arg]
+            if args:
+                cmd = args[0]
+                args = args[1:]
+            else:
+                cmd = ''
+                args = []
+
+            return CmdArgs(cmd, args)
+
+        self.argparser = argparser
+
         return self
 
     async def __aexit__(self, exc_type=None, exc_val=None, exc_tb=None) -> None:
@@ -629,13 +656,14 @@ class Executer:
             ctx = Context(at)
             admin = await self.admin_manager.get(ctx.fname)
             ctx.admin = admin
+            ctx.argparser = self.argparser
 
             async with asyncio.timeout(60.0):
                 await ctx.async_init()
 
                 logger.info(f"尝试执行指令='{ctx.text}' 发起者={ctx.user.log_name}")
 
-                meta_cmd_type = re.search(r'[a-z_]+[^\d]', ctx.cmd_type).group(0)
+                meta_cmd_type = re.search(r'[a-z_]+[^\d]', ctx.cmd).group(0)
                 if meta_cmd_type not in CMD_MAP:
                     raise ValueError("指令不存在")
                 cmd = CMD_MAP[meta_cmd_type]()
@@ -648,9 +676,7 @@ class Executer:
                 await cmd.run(ctx)
 
         except Exception as err:
-            logger.error(
-                f"{err}. 指令内容='{ctx.text}' 发起者={ctx.user.log_name} cmd_type={ctx.cmd_type} args={ctx.args}"
-            )
+            logger.error(f"{err}. 指令内容='{ctx.text}' 发起者={ctx.user.log_name} cmd_type={ctx.cmd} args={ctx.args}")
 
 
 if __name__ == '__main__':
