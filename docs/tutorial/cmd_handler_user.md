@@ -186,7 +186,7 @@
 ### recover 恢复删帖
 
 ```text
-@v_guard recover [url]
+@v_guard recover [tid/pid]
 ```
 
 ***功能***
@@ -195,23 +195,21 @@
 
 ***参数说明***
 
-`url`: 从吧务后台复制出来的，指向被删帖的链接
+`tid/pid`: 待恢复主题帖的[`thread_id`](https://aiotieba.cc/tutorial/start/#thread_id)或回复的[`post_id`](https://aiotieba.cc/tutorial/start/#post_id)
 
 ***举例***
 
 ```text
-@v_guard recover https://tieba.baidu.com/p/7902166405?fid=37574&pid=144609176381#144609176381
+@v_guard recover 144609176381
 ```
 
 意为恢复`pid=144609176381`的回复
 
 ```text
-@v_guard recover https://tieba.baidu.com/p/7902166405?fid=37574&pid=#7902166405
+@v_guard recover 7902166405
 ```
 
 意为恢复`tid=7902166405`的主题帖
-
-你也可以通过手打参数来使用该指令，例如`@v_guard recover #7902166405`意为恢复`tid=7902166405`的主题帖
 
 ***能使用该指令的最低权限级别***
 

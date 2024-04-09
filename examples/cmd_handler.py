@@ -209,7 +209,6 @@ async def delete_parent(ctx: Context) -> bool:
     logger.info(f"尝试删除父级 {ctx.parent}")
 
     await ctx.client.del_post(ctx.parent.fid, ctx.parent.tid, ctx.parent.pid)
-    await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
 
 def block_day_approx(day: int) -> int:
@@ -243,7 +242,7 @@ async def set_perm(ctx: Context, user_id: int, new_perm: int, note: str) -> bool
     if new_perm >= ctx.permission:
         raise ValueError(f"新权限={new_perm} 大于等于 操作者权限={ctx.permission}")
 
-    logger.info(f"吧名={ctx.fname} user_id={user_id} 先前的备注={target_note}")
+    logger.info(f"吧名={ctx.fname} id={user_id} 先前的备注={target_note}")
 
     if new_perm != 0:
         ret = await ctx.db.add_user_id(user_id, new_perm, note=note)
@@ -348,6 +347,7 @@ class CMD_drop(ABCCommand):
         reason = ctx.args[0] if ctx.args else ctx.note
 
         if await block(ctx, ctx.parent.author_id, day, reason):
+            await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
             await delete_parent(ctx)
 
 
@@ -471,10 +471,9 @@ class CMD_exdrop(ABCCommand):
 
         note = ctx.args[0] if ctx.args else ctx.note
 
-        success = False
-        success |= await set_perm(ctx, ctx.parent.author_id, -50, note)
-        success |= await block(ctx, ctx.parent.author_id, 90, note)
-        if success:
+        success0 = await set_perm(ctx, ctx.parent.author_id, -50, note)
+        success1 = await block(ctx, ctx.parent.author_id, 90, note)
+        if success0 and success1:
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
         await delete_parent(ctx)
 
@@ -489,10 +488,9 @@ class CMD_avada_kedavra(ABCCommand):
 
         note = ctx.args[0] if ctx.args else ctx.note
 
-        success = False
-        success |= await set_perm(ctx, ctx.parent.author_id, -50, note)
-        success |= await block(ctx, ctx.parent.author_id, 90, note)
-        if success:
+        success0 = await set_perm(ctx, ctx.parent.author_id, -50, note)
+        success1 = await block(ctx, ctx.parent.author_id, 90, note)
+        if success0 and success1:
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
         dthreads: list[UserThread] = []
@@ -635,6 +633,8 @@ class Executer:
             async with asyncio.timeout(60.0):
                 await ctx.async_init()
 
+                logger.info(f"尝试执行指令='{ctx.text}' 发起者={ctx.user.log_name}")
+
                 meta_cmd_type = re.search(r'[a-z_]+[^\d]', ctx.cmd_type).group(0)
                 if meta_cmd_type not in CMD_MAP:
                     raise ValueError("指令不存在")
@@ -646,10 +646,11 @@ class Executer:
                     raise ValueError(f"权限不足. 最低权限={cmd.req_perm}")
 
                 await cmd.run(ctx)
-                logger.info(f"指令执行完毕. context={ctx}")
 
         except Exception as err:
-            logger.error(f"{err}. context={ctx}")
+            logger.error(
+                f"{err}. 指令内容='{ctx.text}' 发起者={ctx.user.log_name} cmd_type={ctx.cmd_type} args={ctx.args}"
+            )
 
 
 if __name__ == '__main__':
