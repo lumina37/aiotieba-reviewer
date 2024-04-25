@@ -1,6 +1,5 @@
 import asyncio
 import contextlib
-import random
 from collections.abc import Generator
 from typing import NoReturn
 
@@ -21,8 +20,6 @@ async def run(time_interval: float = 0.0) -> NoReturn:
     Args:
         time_interval (float, optional): 每两次审查的时间间隔 以秒为单位. Defaults to 0.0.
     """
-
-    await asyncio.sleep(time_interval / 16 + random.random() * time_interval / 3)
 
     while 1:
         await threads.runner.runner(client._fname)
