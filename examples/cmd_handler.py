@@ -245,9 +245,9 @@ async def block(ctx: Context, id_: str | int, day: int, reason: str = "") -> boo
 async def set_perm(ctx: Context, user_id: int, new_perm: int, note: str) -> bool:
     target_perm, target_note, _ = await ctx.db.get_user_id_full(user_id)
     if target_perm >= ctx.permission:
-        raise ValueError(f"原权限={target_perm} 大于等于 操作者权限={ctx.permission}")
+        raise ValueError(f"目标用户的原权限={target_perm} 大于等于 指令发起者的权限={ctx.permission}")
     if new_perm >= ctx.permission:
-        raise ValueError(f"新权限={new_perm} 大于等于 操作者权限={ctx.permission}")
+        raise ValueError(f"目标用户的新权限={new_perm} 大于等于 指令发起者的权限={ctx.permission}")
 
     logger.info(f"吧名={ctx.fname} id={user_id} 先前的备注={target_note}")
 
@@ -663,20 +663,20 @@ class Executer:
 
                 logger.info(f"尝试执行指令='{ctx.text}' 发起者={ctx.user.log_name}")
 
-                meta_cmd_type = re.search(r'[a-z_]+[^\d]', ctx.cmd).group(0)
-                if meta_cmd_type not in CMD_MAP:
+                meta_cmd = re.search(r'[a-z_]+[^\d]', ctx.cmd).group(0)
+                if meta_cmd not in CMD_MAP:
                     raise ValueError("指令不存在")
-                cmd = CMD_MAP[meta_cmd_type]()
+                cmd = CMD_MAP[meta_cmd]()
 
                 if len(ctx.args) < cmd.req_arg_num:
                     raise ValueError(f"参数量不足. 期望数量={cmd.req_arg_num}")
                 if ctx.permission < cmd.req_perm:
-                    raise ValueError(f"权限不足. 最低权限={cmd.req_perm}")
+                    raise ValueError(f"权限不足. 最低权限需求={cmd.req_perm} 指令发起者权限={ctx.permission}")
 
                 await cmd.run(ctx)
 
         except Exception as err:
-            logger.error(f"{err}. 指令内容='{ctx.text}' 发起者={ctx.user.log_name} cmd_type={ctx.cmd} args={ctx.args}")
+            logger.error(f"{err}. 发起者={ctx.user.log_name} cmd={ctx.cmd} args={ctx.args} at={ctx.at}")
 
 
 if __name__ == '__main__':
