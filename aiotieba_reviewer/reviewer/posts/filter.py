@@ -1,11 +1,11 @@
-from typing import Awaitable, Callable, List, Optional
+from collections.abc import Awaitable, Callable
 
 from ...punish import Punish
 from ...typing import Post
 
-TypePostsFilter = Callable[[List[Post]], Awaitable[Optional[List[Punish]]]]
+TypePostsFilter = Callable[[list[Post]], Awaitable[list[Punish] | None]]
 
-_filters: List[TypePostsFilter] = []
+_filters: list[TypePostsFilter] = []
 
 _append_filter_hook = None
 

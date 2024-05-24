@@ -1,9 +1,10 @@
 import asyncio
 import contextlib
-from typing import Generator, List, NoReturn, Optional
+from collections.abc import Generator
+from typing import NoReturn
 
-from aiotieba.enums import PostSortType
 from aiotieba import get_logger as LOG
+from aiotieba.enums import PostSortType
 
 from .. import client, executor
 from ..client import get_client
@@ -79,7 +80,7 @@ async def run_multi_pn_with_time_threshold(
     _client = await get_client()
 
     @posts.set_producer
-    async def _(thread: Thread) -> List[Post]:
+    async def _(thread: Thread) -> list[Post]:
         post_list = []
 
         last_posts = await _client.get_posts(
@@ -109,7 +110,7 @@ async def run_multi_pn_with_time_threshold(
         await threads.runner.runner(client._fname, pn)
 
 
-async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Optional[Punish]:
+async def test(tid: int, pid: int = 0, is_comment: bool = False) -> Punish | None:
     client = await get_client()
     if not pid:
         posts = await client.get_posts(tid, rn=0)

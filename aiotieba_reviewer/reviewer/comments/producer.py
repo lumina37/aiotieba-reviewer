@@ -1,12 +1,12 @@
-from typing import Awaitable, Callable, List
+from collections.abc import Awaitable, Callable
 
 from ...client import get_client
 from ...typing import Comment, Post
 
-TypeCommentsProducer = Callable[[Post], Awaitable[List[Comment]]]
+TypeCommentsProducer = Callable[[Post], Awaitable[list[Comment]]]
 
 
-async def __default_producer(post: Post) -> List[Comment]:
+async def __default_producer(post: Post) -> list[Comment]:
     client = await get_client()
 
     reply_num = post.reply_num

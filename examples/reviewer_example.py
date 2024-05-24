@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import re
-from typing import List, Optional, Tuple
 
 import aiotieba as tb
 from aiotieba.api.profile import Thread_pf, UserInfo_pf
@@ -26,13 +25,13 @@ async def portrait_hasQR(client: tb.Client, portrait: str) -> bool:
 
 # 同理 缓存返回的结果
 @Cache(maxsize=64).memoize()
-async def get_homepage(client: tb.Client, user_id: int) -> Tuple[UserInfo_pf, List[Thread_pf]]:
+async def get_homepage(client: tb.Client, user_id: int) -> tuple[UserInfo_pf, list[Thread_pf]]:
     return await client.get_homepage(user_id)
 
 
 # 使用装饰器将以下函数设置为针对主题帖的checker
 @tbr.reviewer.thread.set_checker()
-async def check_thread(thread: Thread) -> Optional[Punish]:
+async def check_thread(thread: Thread) -> Punish | None:
     # 水经验
     if thread.is_help:
         if re.search(r'氵|\+3|➕3|加三|加3|经验|jy', thread.text):
@@ -67,7 +66,7 @@ async def check_thread(thread: Thread) -> Optional[Punish]:
 
 # 使用装饰器将以下函数设置为针对回复楼层的checker
 @tbr.reviewer.post.set_checker()
-async def check_post(post: Post) -> Optional[Punish]:
+async def check_post(post: Post) -> Punish | None:
     punish = await _check_post(post)
     if punish:
         return punish
@@ -76,7 +75,7 @@ async def check_post(post: Post) -> Optional[Punish]:
         return punish
 
 
-async def _check_post(post: Post) -> Optional[Punish]:
+async def _check_post(post: Post) -> Punish | None:
     text = post.contents.text
     if text.count('\n') > 132:
         # 闪光弹
@@ -89,14 +88,14 @@ async def _check_post(post: Post) -> Optional[Punish]:
 
 
 @tbr.reviewer.comments.append_filter
-async def comments_conti_filter(comments: List[Comment]) -> List[Punish]:
+async def comments_conti_filter(comments: list[Comment]) -> list[Punish]:
     # 使用过滤器删除多条相互关联的内容
     pass
 
 
 # 使用装饰器将以下函数设置为针对楼中楼的checker
 @tbr.reviewer.comment.set_checker()
-async def check_comment(comment: Comment) -> Optional[Punish]:
+async def check_comment(comment: Comment) -> Punish | None:
     # 自行堆叠函数以复用checker
     # 例如此处的check_text就可以被多个checker复用
     punish = await _check_comment(comment)
@@ -107,11 +106,11 @@ async def check_comment(comment: Comment) -> Optional[Punish]:
         return punish
 
 
-async def _check_comment(comment: Comment) -> Optional[Punish]:
+async def _check_comment(comment: Comment) -> Punish | None:
     pass
 
 
-async def check_text(obj: TypeObj) -> Optional[Punish]:
+async def check_text(obj: TypeObj) -> Punish | None:
     pass
 
 

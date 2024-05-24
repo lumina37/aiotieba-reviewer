@@ -1,12 +1,12 @@
-from typing import Awaitable, Callable, List
+from collections.abc import Awaitable, Callable
 
 from ...client import get_client
 from ...typing import Thread
 
-TypeThreadsProducer = Callable[[], Awaitable[List[Thread]]]
+TypeThreadsProducer = Callable[[], Awaitable[list[Thread]]]
 
 
-async def __default_producer(fname: str, pn: int = 1) -> List[Thread]:
+async def __default_producer(fname: str, pn: int = 1) -> list[Thread]:
     client = await get_client()
     threads = await client.get_threads(fname, pn)
     thread_list = [t for t in threads if not t.is_livepost]

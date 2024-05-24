@@ -1,4 +1,3 @@
-from typing import Optional
 
 from ..client import get_db
 from ..enums import Ops
@@ -13,7 +12,7 @@ def _user_checker(func):
     发现黑名单用户则删帖并封十天
     """
 
-    async def _(obj: TypeObj) -> Optional[Punish]:
+    async def _(obj: TypeObj) -> Punish | None:
         db = await get_db()
         permission = await db.get_user_id(obj.user.user_id)
         if permission <= -50:

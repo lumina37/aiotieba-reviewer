@@ -4,7 +4,7 @@ from .enums import Ops
 from .typing import TypeObj
 
 
-class Punish(object):
+class Punish:
     """
     处罚操作
 

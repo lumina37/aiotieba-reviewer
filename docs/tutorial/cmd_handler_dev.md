@@ -35,13 +35,11 @@ listener = "my_account_1"  # 在这里填用于监听at信息的账号的BDUSS_k
 
 [[Forum]]
 fname = "lol半价"  # 在这里填贴吧名
-admin = "my_account_0"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
-speaker = "my_account_2"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
+key = "my_account_0"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
 
 [[Forum]]
 fname = "抗压背锅"  # 在这里填另一个贴吧名
-admin = "my_account_1"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
-speaker = "my_account_1"  # 在这里填用于在该吧发送回复的账号的BDUSS_key
+key = "my_account_1"  # 在这里填用于在该吧行使吧务权限的账号的BDUSS_key
 ```
 
 ## 运行脚本

@@ -1,11 +1,11 @@
-from typing import Awaitable, Callable, List, Optional
+from collections.abc import Awaitable, Callable
 
 from ...punish import Punish
 from ...typing import Thread
 
-TypeThreadsFilter = Callable[[List[Thread]], Awaitable[Optional[List[Punish]]]]
+TypeThreadsFilter = Callable[[list[Thread]], Awaitable[list[Punish] | None]]
 
-_filters: List[TypeThreadsFilter] = []
+_filters: list[TypeThreadsFilter] = []
 
 _append_filter_hook = None
 

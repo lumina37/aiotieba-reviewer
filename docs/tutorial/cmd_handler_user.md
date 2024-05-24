@@ -148,7 +148,7 @@
 + `40` 大吧主 - 可以添加脚本黑名单 贴吧黑名单<br>
 + `30` 高权限吧务 - 可以置顶 撤置顶 解贴吧黑名单 解脚本黑名单<br>
 + `20` 普通吧务 - 可以删 封 解封 加精 撤精 屏蔽 解屏蔽 拒绝申诉<br>
-+ `10` 非吧务的优秀创作者 - 可以使用[`recommend`](#recommend-首页推荐) [`ping`](#ping-可用性测试)指令<br>
++ `10` 非吧务的优秀创作者 - 可以使用[`recommend`](#recommend-首页推荐) [`get`](#get-用户信息) [`ping`](#ping-可用性测试)指令<br>
 + `0` 普通吧友(默认值) 一般不需要特别指定<br>
 + `-10` 不允许使用指令的用户<br>
 + `-20 ~ -40` 可自定义的惩罚标记<br>
@@ -186,7 +186,7 @@
 ### recover 恢复删帖
 
 ```text
-@v_guard recover [url]
+@v_guard recover [tid/pid]
 ```
 
 ***功能***
@@ -195,23 +195,21 @@
 
 ***参数说明***
 
-`url`: 从吧务后台复制出来的，指向被删帖的链接
+`tid/pid`: 待恢复主题帖的[`thread_id`](https://aiotieba.cc/tutorial/start/#thread_id)或回复的[`post_id`](https://aiotieba.cc/tutorial/start/#post_id)
 
 ***举例***
 
 ```text
-@v_guard recover https://tieba.baidu.com/p/7902166405?fid=37574&pid=144609176381#144609176381
+@v_guard recover 144609176381
 ```
 
 意为恢复`pid=144609176381`的回复
 
 ```text
-@v_guard recover https://tieba.baidu.com/p/7902166405?fid=37574&pid=#7902166405
+@v_guard recover 7902166405
 ```
 
 意为恢复`tid=7902166405`的主题帖
-
-你也可以通过手打参数来使用该指令，例如`@v_guard recover #7902166405`意为恢复`tid=7902166405`的主题帖
 
 ***能使用该指令的最低权限级别***
 
@@ -504,7 +502,7 @@ dropx: 对应x天封禁<br>
 
 ***能使用该指令的最低权限级别***
 
-30 高权限吧务
+40 大吧主
 
 ***开发者说***
 
@@ -693,7 +691,7 @@ dropx: 对应x天封禁<br>
 
 ***能使用该指令的最低权限级别***
 
-40 大吧主
+30 高权限吧务
 
 ---
 
@@ -705,7 +703,7 @@ dropx: 对应x天封禁<br>
 
 ***功能***
 
-获取贴吧用户的个人信息和标记信息
+获取贴吧用户的标记信息和个人信息
 
 ***举例***
 
@@ -713,18 +711,14 @@ dropx: 对应x天封禁<br>
 @v_guard get 李彦宏
 ```
 
-若该指令生效，`speaker`就会向用户发送如下私信
+若该指令生效，指令管理器后台将会打印一条日志
 
 ```
-user_name: 李彦宏
-user_id: 79
-portrait: tb.1.8c1d7226.-pTUqhuXLOiqu7xbSIIx-A
-permission: -20
-note: cmd set by 957339815
-record_time: 2022-04-13 10:20:22
+用户权限级别=0
+备注=
+被记录的时间=1970-01-01 00:00:00
+详细用户信息=UserInfo_pf(user_id=79, portrait='tb.1.8c1d7226.-pTUqhuXLOiqu7xbSIIx-A', user_name='李彦宏', nick_name_new='白皮松林🍁', tieba_uid=10055118, glevel=1, gender=<Gender.MALE: 1>, age=20.4, post_num=126, agree_num=8965, fan_num=12636323, follow_num=92, forum_num=7, sign='', ip='北京', icons=['baiyang'], vimage=VirtualImage_pf(enabled=False, state=''), is_vip=False, is_god=True, is_blocked=False, priv_like=<PrivLike.PUBLIC: 1>, priv_reply=<PrivReply.ALL: 1>)
 ```
-
-为保护`speaker`的生命安全，该指令有长达10秒的全局冷却时间
 
 ***参数说明***
 
@@ -732,60 +726,7 @@ record_time: 2022-04-13 10:20:22
 
 ***能使用该指令的最低权限级别***
 
-0 普通吧友
-
----
-
-### img_set 图片黑名单
-
-```text
-@v_guard img_set [index] [permission] [note]
-```
-
-***功能***
-
-如果这条指令是一条`回复`，则将指令所在主题帖的第`index`张图片的黑名单级别设为`permission`<br>
-如果这条指令是一条`楼中楼`，则将指令所在回复的第`index`张图片的黑名单级别设为`permission`<br>
-如果这条指令是一条`转发了另一主题帖的主题帖`，则将被转发的主题帖的第`index`张图片的黑名单级别设为`permission`<br>
-需要配合云审查工具才能产生效果<br>
-当云审查工具发现设有黑名单级别的图片时，会立即作出相应操作
-
-***参数说明***
-
-`index`: 可选参数，选择第`index`张图片作为操作对象。若该参数缺省，则对所有图片应用相同的黑名单级别<br>
-`permission`: 必填参数，新的图片黑名单级别，`-50`意味着当云审查发现该图片时会删图并将发图者封90天，`-40`删封10天，`-30`删封3天，`-20`删封3天，`-10`仅删帖<br>
-`note`: 必填参数，操作理由，方便日后查阅
-
-***能使用该指令的最低权限级别***
-
-40 大吧主
-
-***开发者说***
-
-配合云审查工具，该指令可以确保某张图片在吧里永远消失
-
----
-
-### img_reset 解图片黑名单
-
-```text
-@v_guard img_reset [index]
-```
-
-***功能***
->
-如果这条指令是一条`回复`，则清除指令所在主题帖的第`index`张图片的黑名单级别<br>
-如果这条指令是一条`楼中楼`，则清除指令所在回复的第`index`张图片的黑名单级别<br>
-如果这条指令是一条`转发了另一主题帖的主题帖`，则清除被转发的主题帖的第`index`张图片的黑名单级别<br>
-需要配合云审查工具才能产生效果
-
-***参数说明***
-
-`index`: 可选参数，选择第`index`张图片作为操作对象。若该参数缺省，则重置所有图片的黑名单级别
-
-***能使用该指令的最低权限级别***
-
-30 高权限吧务
+10 非吧务的优秀创作者
 
 ---
 

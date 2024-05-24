@@ -1,11 +1,11 @@
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
 
 from ... import client
 from ...punish import Punish
 from ...typing import Comment
 from ..user_checker import _user_checker
 
-TypeCommentChecker = Callable[[Comment], Awaitable[Optional[Punish]]]
+TypeCommentChecker = Callable[[Comment], Awaitable[Punish | None]]
 
 
 def __id_checker(func):
@@ -13,7 +13,7 @@ def __id_checker(func):
     装饰器: 使用历史状态缓存避免重复检查
     """
 
-    async def _(comment: Comment) -> Optional[Punish]:
+    async def _(comment: Comment) -> Punish | None:
         if client._db_sqlite.get_id(comment.pid) is not None:
             return
 

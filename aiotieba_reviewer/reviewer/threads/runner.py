@@ -1,5 +1,5 @@
 import asyncio
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from aiotieba import get_logger as LOG
 
@@ -35,7 +35,7 @@ def __runner_perf_stat(func: TypeThreadsRunner) -> TypeThreadsRunner:
 
     async def _(fname: str, pn: int = 1) -> None:
         punish = await perf_stat(func)(fname, pn)
-        LOG().info(f"Checked pn={pn} time={perf_stat.last_time/1e3:.5f}s")
+        LOG().info(f"Checked pn={pn} time={perf_stat.last_time / 1e3:.5f}s")
         return punish
 
     return _

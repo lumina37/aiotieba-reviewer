@@ -1,5 +1,5 @@
 import asyncio
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
 
 from ... import executor
 from ...punish import Punish
@@ -7,14 +7,14 @@ from ...typing import Post
 from ..comment import runner as c_runner
 from . import filter, producer
 
-TypeCommentsRunner = Callable[[Post], Awaitable[Optional[Punish]]]
+TypeCommentsRunner = Callable[[Post], Awaitable[Punish | None]]
 
 
 async def __null_runner(_):
     pass
 
 
-async def __default_runner(post: Post) -> Optional[Punish]:
+async def __default_runner(post: Post) -> Punish | None:
     comments = await producer.producer(post)
     for comment in comments:
         comment.parent = post

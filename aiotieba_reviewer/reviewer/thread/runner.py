@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from aiotieba import get_logger as LOG
 
@@ -31,7 +31,7 @@ def __runner_perf_stat(func: TypeThreadRunner) -> TypeThreadRunner:
 
     async def _(thread: Thread) -> None:
         punish = await perf_stat(func)(thread)
-        LOG().debug(f"Checked tid={thread.tid} time={perf_stat.last_time/1e3:.5f}s")
+        LOG().debug(f"Checked tid={thread.tid} time={perf_stat.last_time / 1e3:.5f}s")
         return punish
 
     return _

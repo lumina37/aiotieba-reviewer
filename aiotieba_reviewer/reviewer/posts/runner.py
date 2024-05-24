@@ -1,6 +1,6 @@
 import asyncio
 import itertools
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
 
 from ... import executor
 from ...punish import Punish
@@ -8,14 +8,14 @@ from ...typing import Thread
 from ..post import runner as p_runner
 from . import filter, producer
 
-TypePostsRunner = Callable[[Thread], Awaitable[Optional[Punish]]]
+TypePostsRunner = Callable[[Thread], Awaitable[Punish | None]]
 
 
 async def __null_runner(_):
     pass
 
 
-async def __default_runner(thread: Thread) -> Optional[Punish]:
+async def __default_runner(thread: Thread) -> Punish | None:
     posts = await producer.producer(thread)
     for post in posts:
         post.parent = thread

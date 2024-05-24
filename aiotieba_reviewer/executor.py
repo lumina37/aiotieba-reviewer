@@ -1,5 +1,5 @@
 import asyncio
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
 
 import aiotieba as tb
 from aiotieba import get_logger as LOG
@@ -8,10 +8,10 @@ from .client import get_client, get_fname
 from .enums import Ops
 from .punish import Punish
 
-TypePunishExecutor = Callable[[Punish], Awaitable[Optional[Punish]]]
+TypePunishExecutor = Callable[[Punish], Awaitable[Punish | None]]
 
 
-async def default_punish_executor(punish: Punish) -> Optional[Punish]:
+async def default_punish_executor(punish: Punish) -> Punish | None:
     if day := punish.day:
         client = await get_client()
         ret = await client.block(get_fname(), punish.obj.user.portrait, day=day, reason=punish.note)
@@ -52,7 +52,7 @@ async def default_punish_executor(punish: Punish) -> Optional[Punish]:
         return punish
 
 
-async def default_punish_executor_test(punish: Punish) -> Optional[Punish]:
+async def default_punish_executor_test(punish: Punish) -> Punish | None:
     if day := punish.day:
         LOG().info(f"Block. user={punish.obj.user!r} day={day} note={punish.note}")
 

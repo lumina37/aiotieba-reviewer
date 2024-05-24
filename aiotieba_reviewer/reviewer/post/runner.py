@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
 
 from ... import executor
 from ...punish import Punish
@@ -6,14 +6,14 @@ from ...typing import Post
 from .. import comments
 from . import checker
 
-TypePostRunner = Callable[[Post], Awaitable[Optional[Punish]]]
+TypePostRunner = Callable[[Post], Awaitable[Punish | None]]
 
 
 async def __null_runner(_):
     pass
 
 
-async def __default_runner(post: Post) -> Optional[Punish]:
+async def __default_runner(post: Post) -> Punish | None:
     punish = await checker.checker(post)
     if punish is not None:
         punish = await executor.punish_executor(punish)
