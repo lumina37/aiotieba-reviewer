@@ -10,7 +10,7 @@ from cacheout import Cache
 import aiotieba_reviewer as tbr
 from aiotieba_reviewer import Ops, Punish, TypeObj, imgproc
 
-sign_check_exp = re.compile(r'企鹅|扣扣', re.I)
+sign_check_exp = re.compile(r'企鹅|扣扣', re.IGNORECASE)
 
 
 # pip install cacheout

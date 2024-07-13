@@ -43,7 +43,8 @@ _set_checker_hook = None
 
 
 def set_checker(
-    enable_user_checker: bool = True, enable_id_checker: bool = True
+    enable_user_checker: bool = True,
+    enable_id_checker: bool = True,
 ) -> Callable[[TypeThreadChecker], TypeThreadChecker]:
     """
     装饰器: 设置主题帖检查函数
