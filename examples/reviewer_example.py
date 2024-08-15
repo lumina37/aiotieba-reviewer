@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import asyncio
 import re
@@ -53,7 +55,7 @@ async def check_thread(thread: Thread) -> Punish | None:
     if user.level >= 4 or user.glevel >= 4 or user.priv_like == 3:
         return
 
-    hpuser, hpthreads = await get_homepage(client, user.user_id)
+    hpuser, _hpthreads = await get_homepage(client, user.user_id)
 
     # 用户个性签名是否包含违规内容
     if sign_check_exp.search(hpuser.sign):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..client import get_db
 from ..enums import Ops
 from ..punish import Punish
