@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Awaitable, Callable
 
 from ... import client
@@ -43,7 +45,8 @@ _set_checker_hook = None
 
 
 def set_checker(
-    enable_user_checker: bool = True, enable_id_checker: bool = True
+    enable_user_checker: bool = True,
+    enable_id_checker: bool = True,
 ) -> Callable[[TypePostChecker], TypePostChecker]:
     """
     装饰器: 设置回复检查函数

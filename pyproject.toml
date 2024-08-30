@@ -17,26 +17,16 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-requires-python = ">=3.10,<3.13"
-dependencies = [
-    "aiotieba[speedup,img]<5,>=4.1.0",
-    "tomli<3,>=1.1.0;python_version<'3.11'",
-    "asyncmy<0.3,>=0.2.9",
-]
+requires-python = ">=3.9,<3.13"
+dependencies = ["aiotieba[speedup,img]<5,>=4.4.0", "tomli<3,>=1.1.0;python_version<'3.11'", "asyncmy<0.3,>=0.2.9"]
 dynamic = ["version"]
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["."]
-
-[tool.setuptools.dynamic]
-version = { attr = "aiotieba_reviewer.__version__.__version__" }
-
-[tool.setuptools.package-data]
-"*" = ["*.pyi"]
+[tool.hatch.version]
+path = "aiotieba_reviewer/__version__.py"
 
 [tool.rye]
 managed = true
@@ -44,15 +34,34 @@ dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py39"
 preview = true
 
 [tool.ruff.format]
 quote-style = "preserve"
 
 [tool.ruff.lint]
-select = ["W", "E", "F", "I", "UP", "YTT", "A", "B", "C4", "PIE", "PT", "PERF", "FURB"]
-ignore = ["E402", "E501"]
+select = [
+    "F",
+    "E",
+    "W",
+    "I",
+    "UP",
+    "YTT",
+    "ASYNC",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "FA",
+    "PIE",
+    "PT",
+    "RSE",
+    "NPY",
+    "PERF",
+    "FURB",
+]
+ignore = ["E402", "E501", "COM812"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]

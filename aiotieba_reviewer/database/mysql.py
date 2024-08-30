@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import ssl
@@ -11,7 +13,7 @@ from ..config import DB_CONFIG
 
 
 def _handle_exception(
-    create_table_func: Callable[["MySQLDB"], None],
+    create_table_func: Callable[[MySQLDB], None],
     null_factory: Callable[[], Any],
     ok_log_level: int = logging.NOTSET,
     err_log_level: int = logging.WARNING,
@@ -27,7 +29,7 @@ def _handle_exception(
     """
 
     def wrapper(func):
-        async def awrapper(self: "MySQLDB", *args, **kwargs):
+        async def awrapper(self: MySQLDB, *args, **kwargs):
             def _log(log_level: int, err: Exception | None = None) -> None:
                 logger = get_logger()
                 if logger.isEnabledFor(err_log_level):
@@ -98,7 +100,7 @@ class MySQLDB:
         self.fname = fname
         self._pool: asyncmy.Pool = None
 
-    async def __aenter__(self) -> "MySQLDB":
+    async def __aenter__(self) -> MySQLDB:
         await self._create_pool()
         return self
 
@@ -176,7 +178,7 @@ class MySQLDB:
                     "CREATE TABLE IF NOT EXISTS `forum_score` \
                     (`fid` INT PRIMARY KEY, `fname` VARCHAR(36) UNIQUE NOT NULL, \
                     `post` TINYINT NOT NULL DEFAULT 0, `follow` TINYINT NOT NULL DEFAULT 0, `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
-                    INDEX `post`(post), INDEX `follow`(follow), INDEX `record_time`(record_time))"
+                    INDEX `post`(post), INDEX `follow`(follow), INDEX `record_time`(record_time))",
                 )
 
         return True
@@ -259,7 +261,7 @@ class MySQLDB:
                 await cursor.execute(
                     f"CREATE TABLE IF NOT EXISTS `user_id_{self.fname}` \
                     (`user_id` BIGINT PRIMARY KEY, `permission` TINYINT NOT NULL DEFAULT 0, `note` VARCHAR(64) NOT NULL DEFAULT '', `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
-                    INDEX `permission`(permission), INDEX `record_time`(record_time))"
+                    INDEX `permission`(permission), INDEX `record_time`(record_time))",
                 )
 
         return True
@@ -284,7 +286,7 @@ class MySQLDB:
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    f"REPLACE INTO `user_id_{self.fname}` VALUES ({user_id},{permission},'{note}',DEFAULT)"
+                    f"REPLACE INTO `user_id_{self.fname}` VALUES ({user_id},{permission},'{note}',DEFAULT)",
                 )
 
         return True
@@ -347,7 +349,7 @@ class MySQLDB:
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    f"SELECT `permission`,`note`,`record_time` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}"
+                    f"SELECT `permission`,`note`,`record_time` FROM `user_id_{self.fname}` WHERE `user_id`={user_id}",
                 )
                 if res_tuple := await cursor.fetchone():
                     return res_tuple
@@ -356,7 +358,12 @@ class MySQLDB:
 
     @_handle_exception(create_table_user_id, list)
     async def get_user_id_list(
-        self, lower_permission: int = 0, upper_permission: int = 50, *, limit: int = 1, offset: int = 0
+        self,
+        lower_permission: int = 0,
+        upper_permission: int = 50,
+        *,
+        limit: int = 1,
+        offset: int = 0,
     ) -> list[int]:
         """
         获取表user_id_{fname}中user_id的列表
@@ -374,7 +381,7 @@ class MySQLDB:
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    f"SELECT `user_id` FROM `user_id_{self.fname}` WHERE `permission`>={lower_permission} AND `permission`<={upper_permission} ORDER BY `record_time` DESC LIMIT {limit} OFFSET {offset}"
+                    f"SELECT `user_id` FROM `user_id_{self.fname}` WHERE `permission`>={lower_permission} AND `permission`<={upper_permission} ORDER BY `record_time` DESC LIMIT {limit} OFFSET {offset}",
                 )
 
                 res_tuples = await cursor.fetchall()
@@ -393,7 +400,7 @@ class MySQLDB:
                 await cursor.execute(
                     f"CREATE TABLE IF NOT EXISTS `imghash_{self.fname}` \
                     (`img_hash` BIGINT UNSIGNED PRIMARY KEY, `raw_hash` CHAR(40) UNIQUE NOT NULL, `permission` TINYINT NOT NULL DEFAULT 0, `note` VARCHAR(64) NOT NULL DEFAULT '', `record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, \
-                    INDEX `permission`(permission), INDEX `record_time`(record_time))"
+                    INDEX `permission`(permission), INDEX `record_time`(record_time))",
                 )
 
         return True
@@ -416,7 +423,7 @@ class MySQLDB:
         async with self._pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    f"REPLACE INTO `imghash_{self.fname}` VALUES ({img_hash},'{raw_hash}',{permission},'{note}',DEFAULT)"
+                    f"REPLACE INTO `imghash_{self.fname}` VALUES ({img_hash},'{raw_hash}',{permission},'{note}',DEFAULT)",
                 )
 
         return True
@@ -438,7 +445,7 @@ class MySQLDB:
             async with conn.cursor() as cursor:
                 if hamming_dist > 0:
                     await cursor.execute(
-                        f"DELETE FROM `imghash_{self.fname}` WHERE BIT_COUNT(`img_hash`^{img_hash})<={hamming_dist}"
+                        f"DELETE FROM `imghash_{self.fname}` WHERE BIT_COUNT(`img_hash`^{img_hash})<={hamming_dist}",
                     )
                 else:
                     await cursor.execute(f"DELETE FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
@@ -462,7 +469,7 @@ class MySQLDB:
             async with conn.cursor() as cursor:
                 if hamming_dist > 0:
                     await cursor.execute(
-                        f"SELECT `permission`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
+                        f"SELECT `permission`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1",
                     )
                 else:
                     await cursor.execute(f"SELECT `permission` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}")
@@ -492,11 +499,11 @@ class MySQLDB:
             async with conn.cursor() as cursor:
                 if hamming_dist > 0:
                     await cursor.execute(
-                        f"SELECT `permission`,`note`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1"
+                        f"SELECT `permission`,`note`,BIT_COUNT(`img_hash`^{img_hash}) AS hd FROM `imghash_{self.fname}` HAVING hd<={hamming_dist} ORDER BY hd ASC LIMIT 1",
                     )
                 else:
                     await cursor.execute(
-                        f"SELECT `permission`,`note` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}"
+                        f"SELECT `permission`,`note` FROM `imghash_{self.fname}` WHERE `img_hash`={img_hash}",
                     )
 
                 if res_tuple := await cursor.fetchone():

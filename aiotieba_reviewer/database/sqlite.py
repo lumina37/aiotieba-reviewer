@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import sqlite3
 from collections.abc import Callable
@@ -96,7 +98,7 @@ class SQLiteDB:
 
         self._conn.execute(
             f"CREATE TABLE IF NOT EXISTS `id_{self.fname}` \
-            (`id` INTEGER PRIMARY KEY, `tag` INTEGER NOT NULL, `record_time` INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+            (`id` INTEGER PRIMARY KEY, `tag` INTEGER NOT NULL, `record_time` INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         )
 
     @handle_exception(bool)

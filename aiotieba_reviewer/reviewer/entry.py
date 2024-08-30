@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import contextlib
 from collections.abc import Generator
@@ -60,7 +62,8 @@ async def run_multi_pn(pn_gen: Generator[int, None, None] = range(4, 0, -1)) -> 
 
 
 async def run_multi_pn_with_time_threshold(
-    time_threshold: int, pn_gen: Generator[int, None, None] = range(4, 0, -1)
+    time_threshold: int,
+    pn_gen: Generator[int, None, None] = range(4, 0, -1),
 ) -> None:
     """
     清洗多个页码中的较新内容 将禁用历史状态缓存以允许重复检查
@@ -84,7 +87,11 @@ async def run_multi_pn_with_time_threshold(
         post_list = []
 
         last_posts = await _client.get_posts(
-            thread.tid, pn=0xFFFF, sort=PostSortType.DESC, with_comments=True, comment_rn=10
+            thread.tid,
+            pn=0xFFFF,
+            sort=PostSortType.DESC,
+            with_comments=True,
+            comment_rn=10,
         )
         end_idx = len(last_posts)
         for i, p in enumerate(last_posts):
@@ -94,7 +101,11 @@ async def run_multi_pn_with_time_threshold(
 
         for pn in range(last_posts.page.total_page - 1, 0, -1):
             _posts = await _client.get_posts(
-                thread.tid, pn=pn, sort=PostSortType.DESC, with_comments=True, comment_rn=10
+                thread.tid,
+                pn=pn,
+                sort=PostSortType.DESC,
+                with_comments=True,
+                comment_rn=10,
             )
             end_idx = len(_posts)
             for i, p in enumerate(_posts):

@@ -43,13 +43,11 @@ class Punish:
         return False
 
     def __repr__(self) -> str:
-        return str(
-            {
-                'op': self.op,
-                'day': self.day,
-                'note': self.note,
-            }
-        )
+        return str({
+            'op': self.op,
+            'day': self.day,
+            'note': self.note,
+        })
 
     def __or__(self, rhs: "Punish") -> "Punish":
         if rhs.day > self.day:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import asyncio
 import dataclasses as dcs
@@ -9,11 +11,12 @@ from collections.abc import Callable
 from typing import Protocol
 
 import aiotieba as tb
-import aiotieba_reviewer as tbr
 from aiotieba.api.get_ats import At
 from aiotieba.api.get_comments._classdef import Contents_cp
 from aiotieba.api.get_posts._classdef import Contents_p, Contents_pt
 from aiotieba.api.get_user_contents import UserThread
+
+import aiotieba_reviewer as tbr
 from aiotieba_reviewer.config import tomllib
 
 tb.logging.enable_filelog()
@@ -265,7 +268,7 @@ class ABCCommand:
     req_perm: int
 
     @abc.abstractmethod
-    async def run(self: "ABCCommand", ctx: Context) -> None: ...
+    async def run(self: ABCCommand, ctx: Context) -> None: ...
 
 
 @dcs.dataclass
@@ -273,7 +276,7 @@ class CMD_delete(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
         await delete_parent(ctx)
 
@@ -283,7 +286,7 @@ class CMD_recover(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.async_fullinit()
 
         tpid = int(ctx.args[0])
@@ -301,7 +304,7 @@ class CMD_hide(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.hide_thread(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -311,7 +314,7 @@ class CMD_unhide(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.unhide_thread(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -321,7 +324,7 @@ class CMD_block(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         day = int(d) if (d := ctx.cmd.removeprefix('block')) else 10
         user = await arg2user_info(ctx.client, ctx.args[0])
         reason = ctx.args[1] if len(ctx.args) > 1 else ctx.note
@@ -335,7 +338,7 @@ class CMD_unblock(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
 
         if await ctx.client.unblock(ctx.fname, user.user_id):
@@ -347,7 +350,7 @@ class CMD_drop(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.async_fullinit()
 
         day = int(d) if (d := ctx.cmd.removeprefix('drop')) else 10
@@ -363,7 +366,7 @@ class CMD_recommend(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 10
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.recommend(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -373,7 +376,7 @@ class CMD_move(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await asyncio.sleep(1.0)
         if not (threads := await ctx.client.get_threads(ctx.fname)):
             return
@@ -393,7 +396,7 @@ class CMD_good(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         cname = ctx.args[0] if ctx.args else ''
 
         if await ctx.client.good(ctx.fname, ctx.tid, cname=cname):
@@ -405,7 +408,7 @@ class CMD_ungood(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 20
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.ungood(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -415,7 +418,7 @@ class CMD_top(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 40
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.top(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -425,7 +428,7 @@ class CMD_untop(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         if await ctx.client.untop(ctx.fname, ctx.tid):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
@@ -435,7 +438,7 @@ class CMD_black(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
@@ -448,7 +451,7 @@ class CMD_white(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
         note = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
@@ -461,7 +464,7 @@ class CMD_reset(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
 
         if await set_perm(ctx, user.user_id, 0, ''):
@@ -473,7 +476,7 @@ class CMD_exdrop(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 40
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.async_fullinit()
 
         note = ctx.args[0] if ctx.args else ctx.note
@@ -490,7 +493,7 @@ class CMD_avada_kedavra(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 50
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.async_fullinit()
 
         note = ctx.args[0] if ctx.args else ctx.note
@@ -518,7 +521,7 @@ class CMD_set(ABCCommand):
     req_arg_num: int = 2
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
         new_perm = int(ctx.args[1])
         note = ctx.args[2] if len(ctx.args) > 2 else ctx.note
@@ -532,7 +535,7 @@ class CMD_get(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 10
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
         user = await ctx.client.get_user_info(user.user_id)
         if user.user_id:
@@ -548,7 +551,7 @@ class CMD_tb_black(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 40
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
 
         if await ctx.client.add_bawu_blacklist(ctx.fname, user.user_id):
@@ -560,7 +563,7 @@ class CMD_tb_reset(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 30
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
 
         if await ctx.client.del_bawu_blacklist(ctx.fname, user.user_id):
@@ -572,7 +575,7 @@ class CMD_ping(ABCCommand):
     req_arg_num: int = 0
     req_perm: int = 10
 
-    async def run(self: "ABCCommand", ctx: Context) -> None:
+    async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
 
@@ -602,7 +605,7 @@ class Executer:
         self.listener = tb.Client(account=tbr.get_account(LISTEN_CONFIG['listener']))
         self.admin_manager = AdminManager()
 
-    async def __aenter__(self) -> "Executer":
+    async def __aenter__(self) -> Executer:
         await self.listener.__aenter__()
 
         listener_userinfo = await self.listener.get_self_info(tb.ReqUInfo.USER_NAME)

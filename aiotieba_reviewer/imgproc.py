@@ -1,4 +1,3 @@
-
 import cv2 as cv
 import numpy as np
 from aiotieba import get_logger as LOG
@@ -77,7 +76,7 @@ def compute_imghash(image: "np.ndarray") -> int:
     try:
         img_hash_array = img_hasher().compute(image).flatten()
         img_hash = 0
-        for hash_num, shift in zip(img_hash_array, range(56, -1, -8)):
+        for hash_num, shift in zip(img_hash_array, range(56, -1, -8), strict=True):
             img_hash += int(hash_num) << shift
     except Exception as err:
         LOG().warning(err)
