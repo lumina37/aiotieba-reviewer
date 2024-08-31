@@ -3,13 +3,13 @@ from collections.abc import AsyncGenerator
 import aiotieba as tb
 
 from .config import get_account
-from .database import MySQLDB, SQLiteDB
+from .database import PostgreDB, SQLiteDB
 
 _fname = ''
 _db_sqlite = None
 
 client_generator: AsyncGenerator[tb.Client, None] = None
-db_generator: AsyncGenerator[MySQLDB, None] = None
+db_generator: AsyncGenerator[PostgreDB, None] = None
 
 
 def set_BDUSS_key(BDUSS_key: str) -> None:
@@ -53,7 +53,7 @@ def set_fname(fname: str) -> None:
     _fname = fname
 
     async def _db_generator():
-        async with MySQLDB(fname) as db:
+        async with PostgreDB(fname) as db:
             while 1:
                 yield db
 
@@ -68,12 +68,12 @@ def get_fname() -> str:
     return _fname
 
 
-async def get_db() -> MySQLDB:
+async def get_db() -> PostgreDB:
     """
-    获取一个MySQL客户端
+    获取一个PostgreSQL客户端
 
     Returns:
-        MySQLDB
+        PostgreDB
     """
 
     return await db_generator.__anext__()

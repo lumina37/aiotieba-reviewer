@@ -11,7 +11,7 @@ from .client import (
     set_fname,
 )
 from .config import get_account
-from .database import MySQLDB, SQLiteDB
+from .database import PostgreDB, SQLiteDB
 from .enums import Ops
 from .perf_stat import aperf_stat
 from .punish import Punish
