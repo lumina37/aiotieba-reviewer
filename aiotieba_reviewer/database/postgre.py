@@ -118,10 +118,10 @@ class PostgreDB:
 
         self._pool: asyncpg.Pool = await asyncpg.create_pool(
             user=DB_CONFIG['user'],
-            password=DB_CONFIG['password'],
+            password=DB_CONFIG.get('password', None),
             database=DB_CONFIG.get('database', self._default_database),
             min_size=DB_CONFIG.get('min_size', self._default_minsize),
-            max_size=DB_CONFIG.get('min_size', self._default_maxsize),
+            max_size=DB_CONFIG.get('max_size', self._default_maxsize),
             max_inactive_connection_lifetime=DB_CONFIG.get(
                 'max_inactive_connection_lifetime', self._default_max_inactive_connection_lifetime
             ),
@@ -146,7 +146,7 @@ class PostgreDB:
 
             conn: asyncpg.Connection = await asyncpg.connect(
                 user=DB_CONFIG['user'],
-                password=DB_CONFIG['password'],
+                password=DB_CONFIG.get('password', None),
                 host=DB_CONFIG.get('host', None),
                 port=DB_CONFIG.get('port', None),
                 database='postgres',
