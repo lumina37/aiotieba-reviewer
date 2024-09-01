@@ -1,2 +1,2 @@
-from .mysql import MySQLDB
+from .postgre import PostgreDB
 from .sqlite import SQLiteDB
