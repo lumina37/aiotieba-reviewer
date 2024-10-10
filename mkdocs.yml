@@ -21,8 +21,8 @@ theme:
     - search.highlight
   language: zh
 
-repo_name: Starry-OvO/aiotieba-reviewer
-repo_url: https://github.com/Starry-OvO/aiotieba-reviewer
+repo_name: lumina37/aiotieba-reviewer
+repo_url: https://github.com/lumina37/aiotieba-reviewer
 
 nav:
   - 介绍: index.md
