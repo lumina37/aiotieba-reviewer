@@ -15,9 +15,10 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9,<3.14"
 dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "tomli<3,>=1.1.0;python_version<'3.11'", "asyncpg<0.30,>=0.29"]
 dynamic = ["version"]
 
@@ -30,6 +31,8 @@ path = "aiotieba_reviewer/__version__.py"
 
 [tool.rye]
 managed = true
+
+[tool.uv]
 dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
