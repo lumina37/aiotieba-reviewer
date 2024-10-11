@@ -29,10 +29,8 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 path = "aiotieba_reviewer/__version__.py"
 
-[tool.rye]
-managed = true
-
 [tool.uv]
+managed = true
 dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
