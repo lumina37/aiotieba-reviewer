@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
 requires-python = ">=3.9,<3.14"
-dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "tomli<3,>=1.1.0;python_version<'3.11'", "asyncpg<0.30,>=0.29"]
+dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "tomli<3,>=1.1.0;python_version<'3.11'", "asyncpg<0.31,>=0.29"]
 dynamic = ["version"]
 
 [build-system]
@@ -29,10 +29,8 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 path = "aiotieba_reviewer/__version__.py"
 
-[tool.rye]
-managed = true
-
 [tool.uv]
+managed = true
 dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
