@@ -15,9 +15,9 @@ class aperf_stat:
     """
 
     __slots__ = [
-        '_rec_queue',
-        '_acc_time_ns',
-        '_last_time_ns',
+        "_rec_queue",
+        "_acc_time_ns",
+        "_last_time_ns",
     ]
 
     def __init__(self, perf_rec_maxlen: int = 30) -> None:

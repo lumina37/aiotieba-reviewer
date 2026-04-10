@@ -10,16 +10,10 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: The Unlicense (Unlicense)",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
-requires-python = ">=3.9,<3.14"
-dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "tomli<3,>=1.1.0;python_version<'3.11'", "asyncpg<0.31,>=0.29"]
+requires-python = ">=3.11"
+dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "asyncpg<0.32,>=0.29"]
 dynamic = ["version"]
 
 [build-system]
@@ -29,17 +23,15 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 path = "aiotieba_reviewer/__version__.py"
 
+[dependency-groups]
+docs = ["mkdocs-material"]
+
 [tool.uv]
 managed = true
-dev-dependencies = ["mkdocs-material"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
-preview = true
-
-[tool.ruff.format]
-quote-style = "preserve"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [

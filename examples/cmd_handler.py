@@ -29,9 +29,9 @@ class ForumCfg:
     key: str
 
 
-with open("cmd_handler.toml", 'rb') as file:
+with open("cmd_handler.toml", "rb") as file:
     LISTEN_CONFIG = tomllib.load(file)
-    FORUMS = [ForumCfg(**f) for f in LISTEN_CONFIG['Forum']]
+    FORUMS = [ForumCfg(**f) for f in LISTEN_CONFIG["Forum"]]
     FNAME2CFG = {cfg.fname: cfg for cfg in FORUMS}
 
 
@@ -107,7 +107,7 @@ class Context:
     async def async_init(self) -> None:
         self.permission = await self.db.get_user_id(self.user.user_id)
 
-        if len(self.at.text.encode('utf-8')) >= 78:
+        if len(self.at.text.encode("utf-8")) >= 78:
             await self.async_fullinit()
 
         self.cmdargs = self.argparser(self.text)
@@ -194,9 +194,9 @@ def get_num_between_two_signs(s: str, sign: str) -> int:
 
 
 async def arg2user_info(client: tb.Client, arg: str) -> tb.typing.UserInfo:
-    if tieba_uid := get_num_between_two_signs(arg, '#'):
+    if tieba_uid := get_num_between_two_signs(arg, "#"):
         user = await client.tieba_uid2user_info(tieba_uid)
-    elif user_id := get_num_between_two_signs(arg, '/'):
+    elif user_id := get_num_between_two_signs(arg, "/"):
         user = await client.get_user_info(user_id, tb.enums.ReqUInfo.BASIC)
     else:
         user = await client.get_user_info(arg, tb.enums.ReqUInfo.BASIC)
@@ -325,7 +325,7 @@ class CMD_block(ABCCommand):
     req_perm: int = 20
 
     async def run(self: ABCCommand, ctx: Context) -> None:
-        day = int(d) if (d := ctx.cmd.removeprefix('block')) else 10
+        day = int(d) if (d := ctx.cmd.removeprefix("block")) else 10
         user = await arg2user_info(ctx.client, ctx.args[0])
         reason = ctx.args[1] if len(ctx.args) > 1 else ctx.note
 
@@ -353,7 +353,7 @@ class CMD_drop(ABCCommand):
     async def run(self: ABCCommand, ctx: Context) -> None:
         await ctx.async_fullinit()
 
-        day = int(d) if (d := ctx.cmd.removeprefix('drop')) else 10
+        day = int(d) if (d := ctx.cmd.removeprefix("drop")) else 10
         reason = ctx.args[0] if ctx.args else ctx.note
 
         if await block(ctx, ctx.parent.author_id, day, reason):
@@ -397,7 +397,7 @@ class CMD_good(ABCCommand):
     req_perm: int = 20
 
     async def run(self: ABCCommand, ctx: Context) -> None:
-        cname = ctx.args[0] if ctx.args else ''
+        cname = ctx.args[0] if ctx.args else ""
 
         if await ctx.client.good(ctx.fname, ctx.tid, cname=cname):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
@@ -467,7 +467,7 @@ class CMD_reset(ABCCommand):
     async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
 
-        if await set_perm(ctx, user.user_id, 0, ''):
+        if await set_perm(ctx, user.user_id, 0, ""):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
 
@@ -583,7 +583,7 @@ def get_cmd_map() -> dict[str, type[ABCCommand]]:
     cmd_map = {}
     for subcls in ABCCommand.__subclasses__():
         clsname = subcls.__name__
-        cmd_map[clsname.removeprefix('CMD_')] = subcls
+        cmd_map[clsname.removeprefix("CMD_")] = subcls
     return cmd_map
 
 
@@ -602,7 +602,7 @@ class Executer:
     last_exec_time: int = dcs.field(default_factory=default_last_exec_time)
 
     def __post_init__(self) -> None:
-        self.listener = tb.Client(account=tbr.get_account(LISTEN_CONFIG['listener']))
+        self.listener = tb.Client(account=tbr.get_account(LISTEN_CONFIG["listener"]))
         self.admin_manager = AdminManager()
 
     async def __aenter__(self) -> Executer:
@@ -612,14 +612,14 @@ class Executer:
         subexp = re.compile(f".*?@{listener_userinfo.user_name}")
 
         def argparser(text: str) -> CmdArgs:
-            text = subexp.sub('', text, count=1)
+            text = subexp.sub("", text, count=1)
 
-            args = [arg.lstrip(' ') for arg in text.split(' ') if arg]
+            args = [arg.lstrip(" ") for arg in text.split(" ") if arg]
             if args:
                 cmd = args[0]
                 args = args[1:]
             else:
-                cmd = ''
+                cmd = ""
                 args = []
 
             return CmdArgs(cmd, args)
@@ -636,7 +636,7 @@ class Executer:
         try:
             while 1:
                 asyncio.create_task(self.__fetch_and_exec_cmds())
-                logger.debug('heartbeat')
+                logger.debug("heartbeat")
                 await asyncio.sleep(4.0)
 
         except asyncio.CancelledError:
@@ -666,7 +666,7 @@ class Executer:
 
                 logger.info(f"尝试执行指令='{ctx.text}' 发起者={ctx.user.log_name}")
 
-                meta_cmd = re.search(r'[a-z_]+[^\d]', ctx.cmd).group(0)
+                meta_cmd = re.search(r"[a-z_]+[^\d]", ctx.cmd).group(0)
                 if meta_cmd not in CMD_MAP:
                     raise ValueError("指令不存在")
                 cmd = CMD_MAP[meta_cmd]()
@@ -682,7 +682,7 @@ class Executer:
             logger.error(f"{err}. 发起者={ctx.user.log_name} cmd={ctx.cmd} args={ctx.args} at={ctx.at}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     async def main():
         async with Executer() as executer:

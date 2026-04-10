@@ -12,14 +12,14 @@ from cacheout import Cache
 import aiotieba_reviewer as tbr
 from aiotieba_reviewer import Ops, Punish, TypeObj, imgproc
 
-sign_check_exp = re.compile(r'企鹅|扣扣', re.IGNORECASE)
+sign_check_exp = re.compile(r"企鹅|扣扣", re.IGNORECASE)
 
 
 # pip install cacheout
 # 为高开销函数创建缓存
 # @Cache(maxsize=256).memoize()
 async def portrait_hasQR(client: tb.Client, portrait: str) -> bool:
-    pimg = await client.get_portrait(portrait, 'l')
+    pimg = await client.get_portrait(portrait, "l")
     if pimg.size and imgproc.has_QRcode(pimg):
         return True
     return False
@@ -36,7 +36,7 @@ async def get_homepage(client: tb.Client, user_id: int) -> tuple[UserInfo_pf, li
 async def check_thread(thread: Thread) -> Punish | None:
     # 水经验
     if thread.is_help:
-        if re.search(r'氵|\+3|➕3|加三|加3|经验|jy', thread.text):
+        if re.search(r"氵|\+3|➕3|加三|加3|经验|jy", thread.text):
             return Punish(thread, Ops.DELETE, 1, note="单开水楼")
 
     user = thread.user
@@ -79,7 +79,7 @@ async def check_post(post: Post) -> Punish | None:
 
 async def _check_post(post: Post) -> Punish | None:
     text = post.contents.text
-    if text.count('\n') > 132:
+    if text.count("\n") > 132:
         # 闪光弹
         return Punish(post, Ops.DELETE, 3, note="闪光弹")
 
@@ -126,8 +126,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     async def main():
-        tbr.set_BDUSS_key('starry')
-        tbr.set_fname('孙笑川')
+        tbr.set_BDUSS_key("starry")
+        tbr.set_fname("孙笑川")
 
         if args.no_test:
             async with tbr.no_test():

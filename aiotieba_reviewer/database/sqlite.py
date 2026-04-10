@@ -71,9 +71,9 @@ class SQLiteDB:
         一般用于快速缓存
     """
 
-    __slots__ = ['fname', '_conn']
+    __slots__ = ["fname", "_conn"]
 
-    def __init__(self, fname: str = '') -> None:
+    def __init__(self, fname: str = "") -> None:
         self.fname = fname
         db_path = Path(f".cache/{self.fname}.sqlite")
         need_init = False
