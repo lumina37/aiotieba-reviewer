@@ -1,5 +1,6 @@
 [project]
 name = "aiotieba-reviewer"
+version = "0.0.0"
 description = "High Flexibility Anti-spam Framework Based on Aiotieba"
 authors = [{ name = "lumina37", email = "starry.qvq@gmail.com" }]
 urls = { Repository = "https://github.com/lumina37/aiotieba-reviewer/", Documentation = "https://review.aiotieba.cc/" }
@@ -14,49 +15,10 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "asyncpg<0.32,>=0.29"]
-dynamic = ["version"]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.version]
-path = "aiotieba_reviewer/__version__.py"
+requires = ["uv_build>=0.11.28,<0.12"]
+build-backend = "uv_build"
 
 [dependency-groups]
 docs = ["mkdocs-material"]
-
-[tool.uv]
-managed = true
-
-[tool.ruff]
-line-length = 120
-target-version = "py311"
-
-[tool.ruff.lint]
-select = [
-    "F",
-    "E",
-    "W",
-    "I",
-    "UP",
-    "YTT",
-    "ASYNC",
-    "B",
-    "A",
-    "COM",
-    "C4",
-    "FA",
-    "PIE",
-    "PT",
-    "RSE",
-    "NPY",
-    "PERF",
-    "FURB",
-]
-ignore = ["E402", "E501", "COM812"]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"typing.py" = ["F401"]
-"*_pb2.py" = ["F401"]
