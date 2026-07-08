@@ -1,11 +1,6 @@
-import sys
+import tomllib
 
 import aiotieba as tb
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 try:
     with open("account.toml", "rb") as f:

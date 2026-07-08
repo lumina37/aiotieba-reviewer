@@ -37,7 +37,7 @@ def decode_QRcode(image: "np.ndarray") -> str:
         data = qrdetector().detectAndDecode(image)[0]
     except Exception as err:
         LOG().warning(err)
-        data = ''
+        data = ""
 
     return data
 
@@ -118,4 +118,4 @@ async def get_imghash_full(image: "np.ndarray", *, hamming_dist: int = 0) -> tup
     if img_hash := compute_imghash(image):
         db = await get_db()
         return await db.get_imghash_full(img_hash, hamming_dist=hamming_dist)
-    return 0, ''
+    return 0, ""

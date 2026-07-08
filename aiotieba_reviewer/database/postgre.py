@@ -87,14 +87,14 @@ class PostgreDB:
         一般用于数据持久化
     """
 
-    __slots__ = ['fname', '_pool']
+    __slots__ = ["fname", "_pool"]
 
-    _default_database: Final[str] = 'aiotieba'
+    _default_database: Final[str] = "aiotieba"
     _default_minsize: Final[int] = 0
     _default_maxsize: Final[int] = 12
     _default_max_inactive_connection_lifetime: Final[int] = 28800
 
-    def __init__(self, fname: str = '') -> None:
+    def __init__(self, fname: str = "") -> None:
         self.fname = fname
         self._pool: asyncpg.Pool = None
 
@@ -112,21 +112,21 @@ class PostgreDB:
         """
 
         ssl_ctx = None
-        if cafile := DB_CONFIG.get('ssl_cafile'):
+        if cafile := DB_CONFIG.get("ssl_cafile"):
             ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             ssl_ctx.load_verify_locations(cafile=cafile)
 
         self._pool: asyncpg.Pool = await asyncpg.create_pool(
-            user=DB_CONFIG['user'],
-            password=DB_CONFIG.get('password', None),
-            database=DB_CONFIG.get('database', self._default_database),
-            min_size=DB_CONFIG.get('min_size', self._default_minsize),
-            max_size=DB_CONFIG.get('max_size', self._default_maxsize),
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG.get("password", None),
+            database=DB_CONFIG.get("database", self._default_database),
+            min_size=DB_CONFIG.get("min_size", self._default_minsize),
+            max_size=DB_CONFIG.get("max_size", self._default_maxsize),
             max_inactive_connection_lifetime=DB_CONFIG.get(
-                'max_inactive_connection_lifetime', self._default_max_inactive_connection_lifetime
+                "max_inactive_connection_lifetime", self._default_max_inactive_connection_lifetime
             ),
-            host=DB_CONFIG.get('host', None),
-            port=DB_CONFIG.get('port', None),
+            host=DB_CONFIG.get("host", None),
+            port=DB_CONFIG.get("port", None),
             ssl=ssl_ctx,
         )
 
@@ -140,20 +140,20 @@ class PostgreDB:
 
         try:
             ssl_ctx = None
-            if cafile := DB_CONFIG.get('ssl_cafile'):
+            if cafile := DB_CONFIG.get("ssl_cafile"):
                 ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 ssl_ctx.load_verify_locations(cafile=cafile)
 
             conn: asyncpg.Connection = await asyncpg.connect(
-                user=DB_CONFIG['user'],
-                password=DB_CONFIG.get('password', None),
-                host=DB_CONFIG.get('host', None),
-                port=DB_CONFIG.get('port', None),
-                database='postgres',
+                user=DB_CONFIG["user"],
+                password=DB_CONFIG.get("password", None),
+                host=DB_CONFIG.get("host", None),
+                port=DB_CONFIG.get("port", None),
+                database="postgres",
                 ssl=ssl_ctx,
             )
 
-            db_name = DB_CONFIG.get('database', self._default_database)
+            db_name = DB_CONFIG.get("database", self._default_database)
             await conn.execute(f'CREATE DATABASE "{db_name}"')
 
             await self._create_pool()
@@ -185,7 +185,7 @@ class PostgreDB:
         return True
 
     @_handle_exception(create_table_forum_score, bool, ok_log_level=logging.INFO)
-    async def add_forum_score(self, fid: int, fname: str = '', /, post: int = 0, follow: int = 0) -> bool:
+    async def add_forum_score(self, fid: int, fname: str = "", /, post: int = 0, follow: int = 0) -> bool:
         """
         将fid添加到表forum_score
 
@@ -267,7 +267,7 @@ class PostgreDB:
         return True
 
     @_handle_exception(create_table_user_id, bool, ok_log_level=logging.INFO)
-    async def add_user_id(self, user_id: int, /, permission: int = 0, *, note: str = '') -> bool:
+    async def add_user_id(self, user_id: int, /, permission: int = 0, *, note: str = "") -> bool:
         """
         将user_id添加到表user_id_{fname}
 
@@ -329,7 +329,7 @@ class PostgreDB:
 
     @staticmethod
     def _default_user_id_full() -> tuple[int, str, datetime.datetime]:
-        return (0, '', datetime.datetime(1970, 1, 1))
+        return (0, "", datetime.datetime(1970, 1, 1))
 
     @_handle_exception(create_table_user_id, _default_user_id_full)
     async def get_user_id_full(self, user_id: int) -> tuple[int, str, datetime.datetime]:
@@ -380,5 +380,5 @@ class PostgreDB:
             )
             records = await stmt.fetch()
 
-        res = [record['user_id'] for record in records]
+        res = [record["user_id"] for record in records]
         return res

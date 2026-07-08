@@ -5,7 +5,7 @@ import aiotieba as tb
 from .config import get_account
 from .database import PostgreDB, SQLiteDB
 
-_fname = ''
+_fname = ""
 _db_sqlite = None
 
 client_generator: AsyncGenerator[tb.Client, None] = None

@@ -15,15 +15,15 @@ class Punish:
     """
 
     __slots__ = [
-        'obj',
-        'line',
-        'op',
-        'day',
-        '_note',
-        '_raw_note',
+        "obj",
+        "line",
+        "op",
+        "day",
+        "_note",
+        "_raw_note",
     ]
 
-    def __init__(self, obj: TypeObj, op: Ops = Ops.NORMAL, day: int = 0, note: str = ''):
+    def __init__(self, obj: TypeObj, op: Ops = Ops.NORMAL, day: int = 0, note: str = ""):
         self.obj = obj
         self.op = op
         self.day = day
@@ -33,7 +33,7 @@ class Punish:
             self._raw_note = note
         else:
             self.line = 0
-            self._raw_note = ''
+            self._raw_note = ""
 
     def __bool__(self) -> bool:
         if self.op > Ops.NORMAL:
@@ -43,11 +43,13 @@ class Punish:
         return False
 
     def __repr__(self) -> str:
-        return str({
-            'op': self.op,
-            'day': self.day,
-            'note': self.note,
-        })
+        return str(
+            {
+                "op": self.op,
+                "day": self.day,
+                "note": self.note,
+            }
+        )
 
     def __or__(self, rhs: "Punish") -> "Punish":
         if rhs.day > self.day:
