@@ -291,29 +291,6 @@ async def check_bawu_target(ctx: Context, user_id: int) -> None:
         raise ValueError(f"目标用户的权限={target_perm} 大于等于 指令发起者的权限={ctx.permission}")
 
 
-async def find_bawu_type(ctx: Context, user_id: int) -> tb.enums.BawuType:
-    bawu_info = await ctx.client.get_bawu_info(ctx.fname)
-    if bawu_info.err:
-        raise bawu_info.err
-
-    for bawu_type, members in (
-        (tb.enums.BawuType.MANAGER, bawu_info.manager),
-        (tb.enums.BawuType.VOICE_EDITOR, bawu_info.voice_editor),
-        (tb.enums.BawuType.IMAGE_EDITOR, bawu_info.image_editor),
-        (tb.enums.BawuType.VIDEO_EDITOR, bawu_info.video_editor),
-        (tb.enums.BawuType.BROADCAST_EDITOR, bawu_info.broadcast_editor),
-        (tb.enums.BawuType.JOURNAL_CHIEF_EDITOR, bawu_info.journal_chief_editor),
-        (tb.enums.BawuType.JOURNAL_EDITOR, bawu_info.journal_editor),
-        (tb.enums.BawuType.ADMIN, bawu_info.admin),
-        (tb.enums.BawuType.PROFESS_ADMIN, bawu_info.profess_admin),
-        (tb.enums.BawuType.FOURTH_ADMIN, bawu_info.fourth_admin),
-    ):
-        if any(member.user_id == user_id for member in members):
-            return bawu_type
-
-    raise ValueError(f"用户`{user_id}`不在吧务团队中")
-
-
 @dcs.dataclass
 class ABCCommand:
     req_arg_num: int
@@ -605,11 +582,13 @@ class CMD_bawu_add(ABCCommand):
 
     async def run(self: ABCCommand, ctx: Context) -> None:
         user = await arg2user_info(ctx.client, ctx.args[0])
+        if not user.user_name:
+            raise ValueError("目标用户名为空")
         await check_bawu_target(ctx, user.user_id)
 
         bawu_type = parse_bawu_type(ctx.args[1] if len(ctx.args) > 1 else "小吧主")
 
-        if await ctx.client.add_bawu(ctx.fname, user.user_id, bawu_type=bawu_type):
+        if await ctx.client.add_bawu(ctx.fname, user.user_name, bawu_type=bawu_type):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
 
@@ -622,9 +601,13 @@ class CMD_bawu_del(ABCCommand):
         user = await arg2user_info(ctx.client, ctx.args[0])
         await check_bawu_target(ctx, user.user_id)
 
-        bawu_type = await find_bawu_type(ctx, user.user_id)
+        user_forum_info = await ctx.client.get_user_forum_info(ctx.fname, user.portrait)
+        if user_forum_info.err:
+            raise user_forum_info.err
+        if user_forum_info.bawu_type is tb.enums.BawuType.UNKNOWN:
+            raise ValueError(f"用户`{user.user_id}`不在吧务团队中")
 
-        if await ctx.client.del_bawu(ctx.fname, user.user_id, bawu_type=bawu_type):
+        if await ctx.client.del_bawu(ctx.fname, user.portrait, bawu_type=user_forum_info.bawu_type):
             await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
 
 

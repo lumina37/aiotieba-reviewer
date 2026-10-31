@@ -14,10 +14,10 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Session",
 ]
 requires-python = ">=3.11"
-dependencies = ["aiotieba[speedup,img]<5,>=4.4.9", "asyncpg<0.32,>=0.29"]
+dependencies = ["aiotieba[speedup,img]", "asyncpg>=0.29"]
 
 [build-system]
-requires = ["uv_build>=0.11.28,<0.12"]
+requires = ["uv_build>=0.13.6,<0.14"]
 build-backend = "uv_build"
 
 [dependency-groups]
