@@ -144,7 +144,7 @@
 
 各权限级别的含义如下
 
-+ `50` 后台管理员 - 可以指定其他非5级用户的权限级别<br>
++ `50` 后台管理员 - 可以指定其他非5级用户的权限级别 任免吧务<br>
 + `40` 大吧主 - 可以添加脚本黑名单 贴吧黑名单<br>
 + `30` 高权限吧务 - 可以置顶 撤置顶 解贴吧黑名单 解脚本黑名单<br>
 + `20` 普通吧务 - 可以删 封 解封 加精 撤精 屏蔽 解屏蔽 拒绝申诉<br>
@@ -730,10 +730,55 @@ dropx: 对应x天封禁<br>
 
 ---
 
-### tb_black 贴吧黑名单
+### bawu_add 添加吧务
 
 ```text
-@v_guard tb_black [id]
+@v_guard bawu_add [id] [bawu_type]
+```
+
+***功能***
+
+将`id`对应的用户添加为吧务
+
+***参数说明***
+
+`id`: [`用户名`](https://aiotieba.cc/tutorial/start#user_name)或[`portrait`](https://aiotieba.cc/tutorial/start#portrait)或包含[`tieba_uid`](https://aiotieba.cc/tutorial/start#tieba_uid)的字符串或包含[`user_id`](https://aiotieba.cc/tutorial/start#user_id)的字符串<br>
+`bawu_type`: 可选参数，吧务类型，默认为`小吧主`。可选值有`小吧主` `语音小编` `图片小编` `视频小编` `广播小编` `吧刊小编` `吧刊主编`
+
+操作者的权限级别必须大于被操作者的权限级别，且不能对自己使用该指令
+
+***能使用该指令的最低权限级别***
+
+50 后台管理员
+
+---
+
+### bawu_del 移除吧务
+
+```text
+@v_guard bawu_del [id]
+```
+
+***功能***
+
+将`id`对应的用户移出吧务团队
+
+***参数说明***
+
+`id`: [`用户名`](https://aiotieba.cc/tutorial/start#user_name)或[`portrait`](https://aiotieba.cc/tutorial/start#portrait)或包含[`tieba_uid`](https://aiotieba.cc/tutorial/start#tieba_uid)的字符串或包含[`user_id`](https://aiotieba.cc/tutorial/start#user_id)的字符串
+
+操作者的权限级别必须大于被操作者的权限级别，且不能对自己使用该指令
+
+***能使用该指令的最低权限级别***
+
+50 后台管理员
+
+---
+
+### blacklist_add 贴吧黑名单
+
+```text
+@v_guard blacklist_add [id]
 ```
 
 ***功能***
@@ -756,10 +801,10 @@ dropx: 对应x天封禁<br>
 
 ---
 
-### tb_reset 解贴吧黑名单
+### blacklist_del 解贴吧黑名单
 
 ```text
-@v_guard tb_reset [id]
+@v_guard blacklist_del [id]
 ```
 
 ***功能***

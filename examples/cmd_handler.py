@@ -11,12 +11,11 @@ from collections.abc import Callable
 from typing import Protocol
 
 import aiotieba as tb
+import aiotieba_reviewer as tbr
 from aiotieba.api.get_ats import At
 from aiotieba.api.get_comments._classdef import Contents_cp
 from aiotieba.api.get_posts._classdef import Contents_p, Contents_pt
 from aiotieba.api.get_user_contents import UserThread
-
-import aiotieba_reviewer as tbr
 from aiotieba_reviewer.config import tomllib
 
 tb.logging.enable_filelog()
@@ -38,7 +37,7 @@ with open("cmd_handler.toml", "rb") as file:
 @dcs.dataclass
 class Admin:
     client: tb.Client
-    db: tbr.MySQLDB
+    db: tbr.PostgreDB
 
 
 @dcs.dataclass
@@ -49,11 +48,14 @@ class AdminManager:
         admin = self.fname2admin.get(fname, None)
 
         if admin is None:
+            if fname not in FNAME2CFG:
+                raise KeyError(f"当前吧未启用指令: {fname}")
+
             forum_cfg = FNAME2CFG[fname]
 
             client = tb.Client(account=tbr.get_account(forum_cfg.key))
             await client.__aenter__()
-            db = tbr.MySQLDB(fname)
+            db = tbr.PostgreDB(fname)
             await db.__aenter__()
 
             admin = Admin(client, db)
@@ -64,8 +66,8 @@ class AdminManager:
 
 @dcs.dataclass
 class CmdArgs:
-    cmd: str
-    args: list[str]
+    cmd: str = "unknown"
+    args: list[str] = dcs.field(default_factory=list)
 
 
 TypeArgParser = Callable[[str], CmdArgs]
@@ -103,6 +105,7 @@ class Context:
 
     def __post_init__(self) -> None:
         self.text = self.at.text
+        self.cmdargs = CmdArgs()
 
     async def async_init(self) -> None:
         self.permission = await self.db.get_user_id(self.user.user_id)
@@ -116,7 +119,7 @@ class Context:
         if self.fullinit_success:
             return
 
-        if self.at.is_comment:
+        if self.at.content_type == tb.ContentType.COMMENT:
             await asyncio.sleep(3.0)
             comments = await self.client.get_comments(self.tid, self.pid, is_comment=True)
             self.parent = comments.post
@@ -124,7 +127,7 @@ class Context:
                 if comment.pid == self.pid:
                     self.text = comment.text
 
-        elif self.at.is_thread:
+        elif self.at.content_type == tb.ContentType.THREAD:
             await asyncio.sleep(3.0)
             posts = await self.client.get_posts(self.tid, rn=0)
             self.text = posts.thread.text
@@ -174,7 +177,7 @@ class Context:
         return self.admin.client
 
     @property
-    def db(self) -> tbr.MySQLDB:
+    def db(self) -> tbr.PostgreDB:
         return self.admin.db
 
     @functools.cached_property
@@ -210,7 +213,7 @@ async def arg2user_info(client: tb.Client, arg: str) -> tb.typing.UserInfo:
 async def delete_parent(ctx: Context) -> bool:
     await ctx.async_fullinit()
 
-    if ctx.at.is_thread:
+    if ctx.at.content_type == tb.ContentType.THREAD:
         if ctx.fname != ctx.parent.fname:
             raise ValueError(f"指令所在吧`{ctx.fname}`与被转发帖所在吧`{ctx.parent.fname}`不匹配")
         if ctx.parent.author_id == 0:
@@ -260,6 +263,55 @@ async def set_perm(ctx: Context, user_id: int, new_perm: int, note: str) -> bool
         ret = await ctx.db.del_user_id(user_id)
 
     return ret
+
+
+BAWU_TYPE_MAP: dict[str, tb.enums.BawuType] = {
+    "小吧主": tb.enums.BawuType.MANAGER,
+    "语音小编": tb.enums.BawuType.VOICE_EDITOR,
+    "图片小编": tb.enums.BawuType.IMAGE_EDITOR,
+    "视频小编": tb.enums.BawuType.VIDEO_EDITOR,
+    "广播小编": tb.enums.BawuType.BROADCAST_EDITOR,
+    "吧刊小编": tb.enums.BawuType.JOURNAL_EDITOR,
+    "吧刊主编": tb.enums.BawuType.JOURNAL_CHIEF_EDITOR,
+}
+
+
+def parse_bawu_type(arg: str) -> tb.enums.BawuType:
+    if (bawu_type := BAWU_TYPE_MAP.get(arg)) is not None:
+        return bawu_type
+    raise ValueError(f"未知的吧务类型`{arg}` 可选值: {' '.join(BAWU_TYPE_MAP)}")
+
+
+async def check_bawu_target(ctx: Context, user_id: int) -> None:
+    if user_id == ctx.user.user_id:
+        raise ValueError("不能对自己使用该指令")
+
+    target_perm = await ctx.db.get_user_id(user_id)
+    if target_perm >= ctx.permission:
+        raise ValueError(f"目标用户的权限={target_perm} 大于等于 指令发起者的权限={ctx.permission}")
+
+
+async def find_bawu_type(ctx: Context, user_id: int) -> tb.enums.BawuType:
+    bawu_info = await ctx.client.get_bawu_info(ctx.fname)
+    if bawu_info.err:
+        raise bawu_info.err
+
+    for bawu_type, members in (
+        (tb.enums.BawuType.MANAGER, bawu_info.manager),
+        (tb.enums.BawuType.VOICE_EDITOR, bawu_info.voice_editor),
+        (tb.enums.BawuType.IMAGE_EDITOR, bawu_info.image_editor),
+        (tb.enums.BawuType.VIDEO_EDITOR, bawu_info.video_editor),
+        (tb.enums.BawuType.BROADCAST_EDITOR, bawu_info.broadcast_editor),
+        (tb.enums.BawuType.JOURNAL_CHIEF_EDITOR, bawu_info.journal_chief_editor),
+        (tb.enums.BawuType.JOURNAL_EDITOR, bawu_info.journal_editor),
+        (tb.enums.BawuType.ADMIN, bawu_info.admin),
+        (tb.enums.BawuType.PROFESS_ADMIN, bawu_info.profess_admin),
+        (tb.enums.BawuType.FOURTH_ADMIN, bawu_info.fourth_admin),
+    ):
+        if any(member.user_id == user_id for member in members):
+            return bawu_type
+
+    raise ValueError(f"用户`{user_id}`不在吧务团队中")
 
 
 @dcs.dataclass
@@ -547,7 +599,37 @@ class CMD_get(ABCCommand):
 
 
 @dcs.dataclass
-class CMD_tb_black(ABCCommand):
+class CMD_bawu_add(ABCCommand):
+    req_arg_num: int = 1
+    req_perm: int = 50
+
+    async def run(self: ABCCommand, ctx: Context) -> None:
+        user = await arg2user_info(ctx.client, ctx.args[0])
+        await check_bawu_target(ctx, user.user_id)
+
+        bawu_type = parse_bawu_type(ctx.args[1] if len(ctx.args) > 1 else "小吧主")
+
+        if await ctx.client.add_bawu(ctx.fname, user.user_id, bawu_type=bawu_type):
+            await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
+
+
+@dcs.dataclass
+class CMD_bawu_del(ABCCommand):
+    req_arg_num: int = 1
+    req_perm: int = 50
+
+    async def run(self: ABCCommand, ctx: Context) -> None:
+        user = await arg2user_info(ctx.client, ctx.args[0])
+        await check_bawu_target(ctx, user.user_id)
+
+        bawu_type = await find_bawu_type(ctx, user.user_id)
+
+        if await ctx.client.del_bawu(ctx.fname, user.user_id, bawu_type=bawu_type):
+            await ctx.client.del_post(ctx.fname, ctx.tid, ctx.pid)
+
+
+@dcs.dataclass
+class CMD_blacklist_add(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 40
 
@@ -559,7 +641,7 @@ class CMD_tb_black(ABCCommand):
 
 
 @dcs.dataclass
-class CMD_tb_reset(ABCCommand):
+class CMD_blacklist_del(ABCCommand):
     req_arg_num: int = 1
     req_perm: int = 30
 
@@ -661,6 +743,10 @@ class Executer:
             ctx.admin = admin
             ctx.argparser = self.argparser
 
+        except Exception:
+            return
+
+        try:
             async with asyncio.timeout(60.0):
                 await ctx.async_init()
 

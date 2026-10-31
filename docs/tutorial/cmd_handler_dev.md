@@ -52,5 +52,5 @@ mv examples/cmd_handler.py .
 运行`cmd_handler.py`（对`Windows`平台，建议使用`pythonw.exe`无窗口运行，对`Linux`平台，建议使用如下的`nohup`指令在后台运行）
 
 ```shell
-nohup python -OO cmd_handler.py >/dev/null 2>&1 &
+nohup python cmd_handler.py >/dev/null 2>&1 &
 ```
